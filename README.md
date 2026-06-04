@@ -1,4 +1,5 @@
-# Flujo Kindle → Markdown → Notion (gratis)
+# Kindle Enhanced Clippings Exporter# 
+Exporta súper detallado tu archivo MyClippings.txt en Notion (.md)
 
 Este paquete incluye:
 - `parse_kindle.py`: convierte `My Clippings.txt` (o `MyClippings_YYYYMMDD.txt`) en **Markdown por libro** dentro de `Books/`.
