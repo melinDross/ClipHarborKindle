@@ -1,4 +1,4 @@
-# Kindle Enhanced Clippings Exporter# 
+# Kindle Enhanced Clippings Exporter
 Exporta súper detallado tu archivo MyClippings.txt en Notion (.md)
 
 Este paquete incluye:
