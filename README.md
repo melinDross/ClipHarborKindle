@@ -32,7 +32,6 @@ No se requieren dependencias externas — `pip install` innecesario.
 ~/Documents/KindleClippings/
 ├─ parse_kindle_notion_v1_1e.py
 ├─ README.md
-├─ CHANGELOG.md
 ├─ Books/
 ├─ backups/
 ├─ logs/
