@@ -3,3 +3,6 @@ logs/
 __pycache__/
 *.pyc
 archive/
+backups/
+My Clippings.txt
+.claude/settings.local.json
