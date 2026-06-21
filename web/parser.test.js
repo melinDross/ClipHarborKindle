@@ -391,6 +391,37 @@ test('exportBooks omits the parenthesized author segment in the filename when th
   assert.equal(books[0].filename, 'Title Without Author.md');
 });
 
+test('exportBooks sets langDetected=true when at least one entry has a recognized language', () => {
+  const books = exportBooks(SAMPLE_CLIPPINGS, 'My Clippings.txt');
+  const bsp = books.find((b) => b.title === 'Blood, Sweat, and Pixels');
+  assert.equal(bsp.langDetected, true);
+});
+
+test('exportBooks sets langDetected=false when no entry has a recognized language', () => {
+  const text = 'Some Title (Some Author)\n- ??? unrecognized metadata line\n\nText.\n==========\n';
+  const books = exportBooks(text, 'My Clippings.txt');
+  assert.equal(books[0].langDetected, false);
+});
+
+test('exportBooks keeps the language signal from a note that gets merged into a highlight (langDetected and book lang)', () => {
+  // The Note's metadata line is the only one with an English signal; the Highlight's
+  // metadata line has none. detectBookLang must see the Note's lang even though
+  // pairNotes() merges it into the Highlight and drops its standalone entry.
+  const text = `Some Title (Some Author)
+- ??? Loc. 49-50
+
+Highlight text with no language signal.
+==========
+Some Title (Some Author)
+- Your Note on Page 6 | Loc. 49-50 | Added on Thursday, June 13, 2024 10:40:00 PM
+
+A note in English.
+==========
+`;
+  const books = exportBooks(text, 'My Clippings.txt');
+  assert.equal(books[0].langDetected, true);
+});
+
 test('exportBooks returns an empty array for a file with no valid entries', () => {
   assert.deepEqual(exportBooks('not a clippings file', 'My Clippings.txt'), []);
 });

@@ -300,7 +300,7 @@ export function exportBooks(text, sourceFilename) {
       return (a.added || '').localeCompare(b.added || '');
     });
 
-    const lang = detectBookLang(paired);
+    const lang = detectBookLang(group.items);
     const markdown = renderBookMarkdown(group.title, group.author, paired, lang, sourceFilename);
 
     books.push({
@@ -309,6 +309,7 @@ export function exportBooks(text, sourceFilename) {
       filename: group.author
         ? `${safeName(group.title)} (${safeName(group.author)}).md`
         : `${safeName(group.title)}.md`,
+      langDetected: group.items.some((it) => it.lang !== null),
       markdown,
       stats: {
         highlights: paired.filter((it) => it.kind === 'Highlight').length,
