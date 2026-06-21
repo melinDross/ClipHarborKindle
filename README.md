@@ -228,7 +228,9 @@ El criterio de fondo no cambió: **automatizar cuando el coste de no hacerlo sup
 
 **Sin dependencias externas.** Podría haber usado librerías como `click` para la CLI o `pytest` para los tests. Decidí no hacerlo para que cualquier persona pueda clonar el repo y ejecutarlo inmediatamente sin pasos adicionales.
 
-**Backup antes de procesar, no después.** El backup se hace al inicio de la ejecución, antes de que el script toque nada. Si el script falla a mitad, el backup ya está hecho. El orden importa.
+**Backup antes de procesar, no después (solo CLI).** El backup se hace al inicio de la ejecución, antes de que el script toque nada. Si el script falla a mitad, el backup ya está hecho. El orden importa.
+
+**La web no hace backup del `My Clippings.txt` — y es intencionado, no un descuido.** El backup del CLI existe porque el script **sobrescribe** los `.md` de salida en cada ejecución: si el parsing fallaba, se perdía el output anterior sin el fichero fuente a mano para reprocesar. La web nunca escribe nada en tu disco salvo lo que descargas explícitamente — lee el `.txt` en memoria del navegador, lo procesa, y el original queda intacto donde estaba. No hay nada que la web pueda sobrescribir, así que no hay nada que respaldar. El único riesgo distinto es cerrar la pestaña antes de descargar el resultado (no el original) — un riesgo de UX, no de pérdida de datos.
 
 **Separadores `---` en el output.** Notion tiene comportamientos inconsistentes con algunos elementos Markdown. Los separadores horizontales son uno de los pocos elementos que se renderizan de forma fiable en imports. La elección no fue estética, fue funcional.
 

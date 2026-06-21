@@ -71,6 +71,16 @@ Ver spec completo en `docs/superpowers/specs/2026-06-21-parser-fixes-and-per-boo
 - Botón de descarga individual por libro (además del zip de "descargar todo").
 - Accesibilidad básica: drop-zone navegable por teclado (`role="button"`, `Enter`/`Space`), `aria-pressed` en los botones de idioma, `aria-live` en mensajes de error y contador de libros.
 
+## Diferencias de comportamiento CLI vs. web (no son bugs, pero generan confusión si no se documentan)
+
+### La web no hace backup del `My Clippings.txt` — y no le hace falta
+
+El CLI copia el `My Clippings.txt` original a `backups/` con timestamp antes de cada ejecución (ver Fase 3 del README). La web **no tiene ningún mecanismo equivalente** — confirmado: no hay ninguna referencia a "backup" en `web/app.js` ni `web/parser.js`.
+
+**Por qué no es una regresión:** el backup del CLI protege contra un riesgo muy concreto que no existe en la web. El CLI lee `My Clippings.txt` y **escribe** los `.md` de salida en `Books/`, sobrescribiendo la ejecución anterior — si el parsing fallaba o tenía un bug, se perdía el output bueno anterior sin poder recuperarlo, de ahí la necesidad de un backup del fichero fuente para poder re-procesar. La web nunca escribe nada en el disco del usuario salvo lo que se descarga explícitamente (el `.zip` o un `.md` individual, vía `Blob`/`URL.createObjectURL`): lee el fichero en memoria con `FileReader.readAsText()`, lo procesa, y el `My Clippings.txt` original queda exactamente donde estaba, sin tocar. No hay nada que la web pueda sobrescribir o corromper del lado del usuario, así que no hay nada que respaldar.
+
+**El único riesgo real en la web** es distinto: si el usuario cierra la pestaña antes de descargar, pierde el resultado procesado (no el fichero original) y tiene que volver a arrastrar el `.txt`. Esto está documentado aquí para que quede claro que es una diferencia de diseño, no un descuido — si en el futuro se quisiera mitigar, sería con un aviso en la UI antes de cerrar/recargar con resultados sin descargar (`beforeunload`), no con un backup del fichero fuente.
+
 ## Documentación externa actualizada
 
 - **README.md (2026-06-21):** reescrito para reflejar que `web/parser.js` es ahora la fuente de verdad y `cli/parse_kindle_notion_v1_1e.py` está congelado. Se mantuvo el formato narrativo de portfolio QA (origen, fases, decisiones, testing, historial de versiones) y se añadió una "Fase 5 — Migración a web" explicando el por qué de la migración y de la gobernanza de parsing. También se documentó ahí el cambio de criterio sobre tests automatizados (el CLI no los tiene por decisión consciente; la web sí, y se explica por qué cambió el contexto).
