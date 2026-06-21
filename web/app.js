@@ -83,9 +83,12 @@ function applyLang(lang) {
   document.documentElement.lang = lang;
 
   dropZone.innerHTML = t('dropZone');
+  dropZone.setAttribute('aria-label', t('dropZoneAriaLabel'));
   if (!downloadButton.disabled) downloadButton.textContent = t('downloadLabel');
   langEsButton.classList.toggle('active', lang === 'es');
   langEnButton.classList.toggle('active', lang === 'en');
+  langEsButton.setAttribute('aria-pressed', String(lang === 'es'));
+  langEnButton.setAttribute('aria-pressed', String(lang === 'en'));
 
   if (!errorMessage.hidden && lastErrorKey) {
     errorMessage.textContent = t(lastErrorKey);
@@ -125,6 +128,13 @@ dropZone.addEventListener('drop', (event) => {
   dropZone.classList.remove('dragover');
   const file = event.dataTransfer.files[0];
   if (file) handleFile(file);
+});
+
+dropZone.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    fileInput.click();
+  }
 });
 
 fileInput.addEventListener('change', () => {

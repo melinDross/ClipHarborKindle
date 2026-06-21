@@ -16,15 +16,15 @@
   </header>
 
   <main>
-    <div id="drop-zone" class="drop-zone">
+    <div id="drop-zone" class="drop-zone" role="button" tabindex="0">
       ⬆️ Arrastra aquí tu "My Clippings.txt"<br>o haz clic para seleccionar
     </div>
     <input type="file" id="file-input" accept=".txt" hidden>
 
-    <p id="error-message" class="error" hidden></p>
+    <p id="error-message" class="error" aria-live="polite" hidden></p>
 
     <section id="results" hidden>
-      <h2 id="book-count"></h2>
+      <h2 id="book-count" aria-live="polite"></h2>
       <ul id="book-list"></ul>
       <button id="download-button">⬇️ Descargar todo (.zip)</button>
     </section>
