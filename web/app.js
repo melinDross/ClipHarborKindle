@@ -54,6 +54,7 @@ function renderBooks(books) {
 function applyLang(lang) {
   currentLang = lang;
   localStorage.setItem('uiLang', lang);
+  document.documentElement.lang = lang;
 
   dropZone.innerHTML = t('dropZone');
   if (!downloadButton.disabled) downloadButton.textContent = t('downloadLabel');
