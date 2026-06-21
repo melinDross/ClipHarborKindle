@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { safeName, parsePos, parsePage } from './parser.js';
+import { safeName, parsePos, parsePage, extractKind, detectEntryLang, parseAddedCompact, rangesOverlap, pairNotes } from './parser.js';
 
 test('safeName strips punctuation and joins words with underscores', () => {
   assert.equal(safeName('Parque Jurásico (Z-Library)'), 'Parque_Jurásico_Z-Library');
@@ -54,8 +54,6 @@ test('parsePage returns null when there is no page metadata', () => {
   assert.equal(parsePage('Your Highlight | Loc. 49-50'), null);
 });
 
-import { extractKind, detectEntryLang } from './parser.js';
-
 test('extractKind recognizes English highlight/note/bookmark', () => {
   assert.equal(extractKind('Your Highlight on Page 6'), 'Highlight');
   assert.equal(extractKind('Your Note on Page 6'), 'Note');
@@ -84,8 +82,6 @@ test('detectEntryLang returns null when no language signal is present', () => {
   assert.equal(detectEntryLang('???'), null);
 });
 
-import { parseAddedCompact } from './parser.js';
-
 test('parseAddedCompact formats an English date with PM', () => {
   assert.equal(
     parseAddedCompact('- Your Highlight on Page 6 | Loc. 49-50 | Added on Thursday, June 13, 2024 10:38:24 PM'),
@@ -110,8 +106,6 @@ test('parseAddedCompact formats a Spanish date', () => {
 test('parseAddedCompact falls back to the raw text when the date does not match either pattern', () => {
   assert.equal(parseAddedCompact('Added on some unparseable text'), 'some unparseable text');
 });
-
-import { rangesOverlap, pairNotes } from './parser.js';
 
 test('rangesOverlap returns true for overlapping ranges', () => {
   assert.equal(rangesOverlap(10, 20, 15, 25), true);
@@ -152,4 +146,58 @@ test('pairNotes passes bookmarks through unchanged with an empty noteText', () =
   const result = pairNotes(items);
   assert.equal(result.length, 1);
   assert.equal(result[0].noteText, '');
+});
+
+test('pairNotes searches backward and attaches note to most recent matching highlight, skipping non-matching ones', () => {
+  const items = [
+    { kind: 'Highlight', posStart: 10, posEnd: 20, pageNum: 2, text: 'Earlier highlight.' },
+    { kind: 'Highlight', posStart: 100, posEnd: 110, pageNum: 10, text: 'Later highlight that does not overlap note.' },
+    { kind: 'Note', posStart: 15, posEnd: 18, pageNum: 2, text: 'My note.' },
+  ];
+  const result = pairNotes(items);
+  assert.equal(result.length, 2);
+  assert.equal(result[0].noteText, 'My note.');
+  assert.equal(result[0].text, 'Earlier highlight.');
+  assert.equal(result[1].noteText, '');
+  assert.equal(result[1].text, 'Later highlight that does not overlap note.');
+});
+
+test('pairNotes attaches note to most recent highlight when multiple highlights overlap the note', () => {
+  const items = [
+    { kind: 'Highlight', posStart: 10, posEnd: 30, pageNum: 3, text: 'First overlapping highlight.' },
+    { kind: 'Highlight', posStart: 15, posEnd: 25, pageNum: 3, text: 'Second overlapping highlight.' },
+    { kind: 'Note', posStart: 18, posEnd: 22, pageNum: 3, text: 'Overlaps both highlights.' },
+  ];
+  const result = pairNotes(items);
+  assert.equal(result.length, 2);
+  assert.equal(result[0].noteText, '');
+  assert.equal(result[0].text, 'First overlapping highlight.');
+  assert.equal(result[1].noteText, 'Overlaps both highlights.');
+  assert.equal(result[1].text, 'Second overlapping highlight.');
+  assert.equal(result[1].metaOverrideKind, 'Note');
+});
+
+test('pairNotes attaches note to highlight via page-number fallback when position ranges do not overlap', () => {
+  const items = [
+    { kind: 'Highlight', posStart: 10, posEnd: 20, pageNum: 5, text: 'Highlight on page 5.' },
+    { kind: 'Note', posStart: 100, posEnd: 110, pageNum: 5, text: 'Note on same page, different position range.' },
+  ];
+  const result = pairNotes(items);
+  assert.equal(result.length, 1);
+  assert.equal(result[0].noteText, 'Note on same page, different position range.');
+  assert.equal(result[0].text, 'Highlight on page 5.');
+  assert.equal(result[0].metaOverrideKind, 'Note');
+});
+
+test('pairNotes joins multiple notes attached to the same highlight with a space', () => {
+  const items = [
+    { kind: 'Highlight', posStart: 49, posEnd: 50, pageNum: 6, text: 'Highlight text.' },
+    { kind: 'Note', posStart: 49, posEnd: 50, pageNum: 6, text: 'First note.' },
+    { kind: 'Note', posStart: 49, posEnd: 50, pageNum: 6, text: 'Second note.' },
+  ];
+  const result = pairNotes(items);
+  assert.equal(result.length, 1);
+  assert.equal(result[0].noteText, 'First note. Second note.');
+  assert.equal(result[0].text, 'Highlight text.');
+  assert.equal(result[0].metaOverrideKind, 'Note');
 });
