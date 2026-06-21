@@ -182,7 +182,11 @@ export function parseEntries(text) {
       noteText: undefined,
     };
 
-    const key = `${title} ${author}`;
+    // Use a collision-free key: JSON.stringify(tuple) instead of naive
+    // string concatenation, which could collide when space boundaries shift.
+    // E.g. title="Foo" author="Bar Baz" and title="Foo Bar" author="Baz"
+    // both produce "Foo Bar Baz" with concatenation but distinct keys with tuple.
+    const key = JSON.stringify([title, author]);
     if (!byKey.has(key)) {
       const group = { title, author, items: [] };
       byKey.set(key, group);

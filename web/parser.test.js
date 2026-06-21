@@ -264,3 +264,32 @@ test('parseEntries returns an empty array for a file with no valid blocks', () =
   assert.deepEqual(parseEntries(''), []);
   assert.deepEqual(parseEntries('==========\n==========\n'), []);
 });
+
+test('parseEntries uses collision-free (title, author) tuple key to avoid merging distinct books with space-boundary shifts', () => {
+  // Regression test for Task 6 review finding: naive `${title} ${author}` concatenation
+  // collides when a space boundary shifts. E.g., title="Foo" author="Bar Baz" produces
+  // the same string "Foo Bar Baz" as title="Foo Bar" author="Baz". With a proper
+  // tuple key (JSON.stringify), these are correctly treated as distinct books.
+  const text = `Foo (Bar Baz)
+- Your Highlight on Page 1 | Loc. 1 | Added on Thursday, June 13, 2024 10:38:24 PM
+
+First book's highlight.
+==========
+Foo Bar (Baz)
+- Your Highlight on Page 2 | Loc. 2 | Added on Thursday, June 13, 2024 10:39:00 PM
+
+Second book's highlight.
+==========
+`;
+  const books = parseEntries(text);
+  assert.equal(books.length, 2, 'Should have two distinct book groups, not merge into one');
+  assert.equal(books[0].title, 'Foo');
+  assert.equal(books[0].author, 'Bar Baz');
+  assert.equal(books[0].items.length, 1);
+  assert.equal(books[0].items[0].text, "First book's highlight.");
+
+  assert.equal(books[1].title, 'Foo Bar');
+  assert.equal(books[1].author, 'Baz');
+  assert.equal(books[1].items.length, 1);
+  assert.equal(books[1].items[0].text, "Second book's highlight.");
+});
