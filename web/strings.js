@@ -17,6 +17,9 @@ export const STRINGS = {
       `${book.title}${book.author ? ' — ' + book.author : ''} — ${book.stats.highlights} subrayados, ${book.stats.notes} notas, ${book.stats.bookmarks} marcadores`,
     downloadLabel: '⬇️ Descargar todo (.zip)',
     generatingLabel: 'Generando…',
+    langWarning: '⚠️ Idioma no reconocido — revisa el resultado',
+    downloadOneLabel: '⬇️ Descargar',
+    dropZoneAriaLabel: 'Subir fichero My Clippings.txt',
   },
   en: {
     dropZone: '⬆️ Drag your "My Clippings.txt" here<br>or click to browse',
@@ -29,6 +32,9 @@ export const STRINGS = {
       `${book.title}${book.author ? ' — ' + book.author : ''} — ${book.stats.highlights} highlights, ${book.stats.notes} notes, ${book.stats.bookmarks} bookmarks`,
     downloadLabel: '⬇️ Download all (.zip)',
     generatingLabel: 'Generating…',
+    langWarning: '⚠️ Unrecognized language — please check the result',
+    downloadOneLabel: '⬇️ Download',
+    dropZoneAriaLabel: 'Upload My Clippings.txt file',
   },
 };
 
