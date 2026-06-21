@@ -277,6 +277,48 @@ function renderMeta(parts, metaKind) {
  * fixed at "blockquote"/true/"---" and never changed, so they're hardcoded
  * here rather than ported as unused configurability (YAGNI).
  */
+/**
+ * Public entry point for app.js. Mirrors the per-book pipeline in main() of
+ * cli/parse_kindle_notion_v1_1e.py: pair notes to highlights, sort entries by
+ * position/page/date, detect output language, render Markdown, and compute
+ * the same highlight/note/bookmark counts shown in the book's header.
+ */
+export function exportBooks(text, sourceFilename) {
+  const groups = parseEntries(text);
+  const books = [];
+
+  for (const group of groups) {
+    const paired = pairNotes(group.items);
+
+    paired.sort((a, b) => {
+      const posA = a.posStart ?? Number.MAX_SAFE_INTEGER;
+      const posB = b.posStart ?? Number.MAX_SAFE_INTEGER;
+      if (posA !== posB) return posA - posB;
+      const pageA = a.pageNum ?? Number.MAX_SAFE_INTEGER;
+      const pageB = b.pageNum ?? Number.MAX_SAFE_INTEGER;
+      if (pageA !== pageB) return pageA - pageB;
+      return (a.added || '').localeCompare(b.added || '');
+    });
+
+    const lang = detectBookLang(paired);
+    const markdown = renderBookMarkdown(group.title, group.author, paired, lang, sourceFilename);
+
+    books.push({
+      title: group.title,
+      author: group.author,
+      filename: `${safeName(group.title)}.md`,
+      markdown,
+      stats: {
+        highlights: paired.filter((it) => it.kind === 'Highlight').length,
+        notes: paired.filter((it) => it.metaOverrideKind === 'Note' || it.kind === 'Note').length,
+        bookmarks: paired.filter((it) => it.kind === 'Bookmark').length,
+      },
+    });
+  }
+
+  return books;
+}
+
 export function renderBookMarkdown(title, author, items, lang, sourceFilename) {
   const kindMap = KIND_MAP[lang];
 
