@@ -5,4 +5,5 @@ __pycache__/
 archive/
 backups/
 My Clippings.txt
-.claude/settings.local.json
+.claude/
+.superpowers/
