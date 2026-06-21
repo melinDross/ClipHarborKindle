@@ -131,8 +131,13 @@ downloadButton.addEventListener('click', async () => {
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = buildZipFilename();
+    document.body.appendChild(link);
     link.click();
-    URL.revokeObjectURL(link.href);
+    document.body.removeChild(link);
+    // Revoking immediately can make Chrome lose the suggested filename for
+    // the blob: URL before the download actually starts, falling back to a
+    // generated name with no extension — give it a tick first.
+    setTimeout(() => URL.revokeObjectURL(link.href), 0);
   } catch (err) {
     showError('zipError');
   } finally {
