@@ -9,8 +9,14 @@ Este fichero documenta cambios técnicos, bugs encontrados y decisiones relevant
 ## Estado de los scripts
 
 - `parse_kindle_notion_v1_1d.py` — **eliminado** del root (era versión de referencia, redundante con v1_1e).
-- `parse_kindle_notion_v1_1e.py` — versión marcada como estable en el README.
-- `parse_kindle_notion_v1_2_1_fix.py` — experimento con dedup vía hash SHA1 embebido (`<!-- key:... -->`) y modo append-only. El README dice que la dedup de v1.2 se "canceló", pero este script sí la implementa de forma funcional — pendiente de decidir si se promueve a versión estable o se documenta como experimental.
+- `cli/parse_kindle_notion_v1_1e.py` — versión marcada como estable en el README. **Congelado** (ver "Gobernanza del parsing" más abajo): sigue funcionando por CLI, pero no recibe nuevas funcionalidades de parsing. Movido de la raíz a `cli/` el 2026-06-21 (junto con `v1_2_1_fix.py`) para no mezclar los scripts Python con la nueva web en `/web/`.
+- `cli/parse_kindle_notion_v1_2_1_fix.py` — experimento con dedup vía hash SHA1 embebido (`<!-- key:... -->`) y modo append-only. El README dice que la dedup de v1.2 se "canceló", pero este script sí la implementa de forma funcional — pendiente de decidir si se promueve a versión estable o se documenta como experimental.
+
+## Gobernanza del parsing (a partir de 2026-06-21)
+
+Se está construyendo una versión web del exportador (`/web/`, ver spec en `docs/superpowers/specs/2026-06-21-web-exporter-design.md`) pensada para usuarios sin conocimientos técnicos: corre 100% en el navegador (sin backend), con la lógica de parsing portada a `web/parser.js`.
+
+**`web/parser.js` pasa a ser la fuente de verdad de la lógica de parsing.** `cli/parse_kindle_notion_v1_1e.py` queda congelado: los bugs y mejoras pendientes de este documento (regex título/autor, colisión de nombre de fichero, manejo de encoding) se implementan de aquí en adelante solo en `parser.js`, no en el `.py`. El script Python no se retira del repo, pero no se itera más sobre su lógica de parsing.
 
 ## Bugs encontrados
 

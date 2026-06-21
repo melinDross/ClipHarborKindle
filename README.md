@@ -198,16 +198,19 @@ Si el proyecto escalara a múltiples contribuidores, o si el formato de Amazon c
 
 ```
 Kindle-Enhanced-Clippings-Exporter/
-├── parse_kindle_notion_v1_1e.py       # Script principal (versión estable)
-├── parse_kindle_notion_v1_1d.py       # Versión anterior (referencia)
-├── parse_kindle_notion_v1_2_1_fix.py  # Experimento cancelado (v1.2)
+├── cli/
+│   ├── parse_kindle_notion_v1_1e.py       # Script principal (versión estable, congelado)
+│   └── parse_kindle_notion_v1_2_1_fix.py  # Experimento cancelado (v1.2)
+├── web/                                   # Exportador web (en desarrollo), ver docs/superpowers/specs/
 ├── README.md
-├── Books/                             # Output: un .md por libro
-├── backups/                           # Copias del My Clippings.txt con timestamp
+├── Books/                                 # Output: un .md por libro
+├── backups/                               # Copias del My Clippings.txt con timestamp
 └── .gitignore
 ```
 
-Las versiones anteriores se mantienen en el repositorio de forma intencionada: sirven como referencia de la evolución del proyecto y permiten entender qué se añadió y qué se descartó en cada iteración.
+Se ejecuta desde la raíz del repo (ej. `python3 cli/parse_kindle_notion_v1_1e.py`), para que las rutas relativas (`Books/`, `backups/`, `logs/`) sigan resolviendo correctamente.
+
+`parse_kindle_notion_v1_1e.py` está congelado: la lógica de parsing ya no se itera aquí, sino en `web/parser.js` (ver `CLAUDE.md`).
 
 ---
 

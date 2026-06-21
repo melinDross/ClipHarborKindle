@@ -4,11 +4,11 @@ Fecha: 2026-06-21
 
 ## Contexto y motivación
 
-El proyecto actual (`parse_kindle_notion_v1_1e.py`) requiere conectar el Kindle por USB y ejecutar un script Python desde la terminal. Esto es una barrera para usuarios sin conocimientos técnicos. Este spec define una versión web del exportador, pensada para que cualquier persona pueda generar sus `.md` para Notion sin instalar nada ni usar la línea de comandos.
+El proyecto actual (`cli/parse_kindle_notion_v1_1e.py`) requiere conectar el Kindle por USB y ejecutar un script Python desde la terminal. Esto es una barrera para usuarios sin conocimientos técnicos. Este spec define una versión web del exportador, pensada para que cualquier persona pueda generar sus `.md` para Notion sin instalar nada ni usar la línea de comandos.
 
 ## Alcance del MVP
 
-- Replica el comportamiento de `parse_kindle_notion_v1_1e.py` (sin la deduplicación por hash de `v1_2_1_fix.py`).
+- Replica el comportamiento de `cli/parse_kindle_notion_v1_1e.py` (sin la deduplicación por hash de `cli/parse_kindle_notion_v1_2_1_fix.py`).
 - Solo descarga de `.md` (empaquetados en `.zip`). **Sin integración con la API de Notion** en esta versión — queda fuera de alcance.
 - Sin backend: 100% client-side. El fichero `My Clippings.txt` del usuario nunca sale de su navegador.
 - Sin persistencia entre sesiones: no hay backup automático, no hay log, no hay dedup. Cada subida es un ciclo independiente de principio a fin.
@@ -33,7 +33,7 @@ web/
 
 ### `parser.js`
 
-Puerto directo de la lógica de parsing de `parse_kindle_notion_v1_1e.py`. Funciones puras, sin tocar el DOM:
+Puerto directo de la lógica de parsing de `cli/parse_kindle_notion_v1_1e.py`. Funciones puras, sin tocar el DOM:
 
 - `parseEntries(text)` — divide el texto por `==========`, extrae título/autor/tipo/posición/página/fecha por bloque, agrupa por libro.
 - `pairNotes(items)` — vincula notas con highlights por solapamiento de rango de posición (`rangesOverlap`) o coincidencia de página, igual que `pair_notes` en Python.
@@ -82,12 +82,16 @@ Todo ocurre en memoria en un único ciclo síncrono tras soltar el fichero.
 ## Testing
 
 - `parser.js` se testea con fixtures de texto cubriendo los casos ya documentados en `CLAUDE.md`/README: rango de posición con guion ASCII (`Loc. 49-50`), metadatos en español vs inglés, nota vinculada a highlight por solapamiento de rango, bookmark sin texto asociado. Runner: `node:test` (stdlib de Node, sin dependencias de npm).
-- No hay tests automatizados de UI/DOM en este MVP. Verificación manual: arrastrar un `My Clippings.txt` real y comparar el `.zip` descargado contra el output que generaría hoy `parse_kindle_notion_v1_1e.py` para el mismo fichero.
+- No hay tests automatizados de UI/DOM en este MVP. Verificación manual: arrastrar un `My Clippings.txt` real y comparar el `.zip` descargado contra el output que generaría hoy `cli/parse_kindle_notion_v1_1e.py` para el mismo fichero.
+
+## Gobernanza futura del parsing
+
+A partir de esta versión, **`parser.js` pasa a ser la fuente de verdad para la lógica de parsing**. `cli/parse_kindle_notion_v1_1e.py` queda congelado tal cual está: sigue funcionando para quien lo use por CLI, pero no recibe nuevas funcionalidades de parsing. Los bugs y mejoras pendientes documentados en `CLAUDE.md` (regex título/autor con paréntesis anidados, colisión de nombre de fichero, manejo de encoding) se implementan de aquí en adelante únicamente en `parser.js`, no en el `.py`.
 
 ## Fuera de alcance (explícitamente, para esta versión)
 
 - Integración con la API de Notion.
-- Deduplicación de entradas (lógica de `v1_2_1_fix.py`).
+- Deduplicación de entradas (lógica de `cli/parse_kindle_notion_v1_2_1_fix.py`).
 - Backup automático del fichero subido.
 - Logs de ejecución.
 - Tests automatizados de UI.
