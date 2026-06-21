@@ -40,10 +40,36 @@ function renderBooks(books) {
   bookList.innerHTML = '';
   for (const book of books) {
     const li = document.createElement('li');
-    li.textContent = t('bookListItem')(book);
+    li.className = 'book-row';
+
+    const textSpan = document.createElement('span');
+    textSpan.textContent = t('bookListItem')(book);
+    if (!book.langDetected) {
+      textSpan.textContent += ` ${t('langWarning')}`;
+    }
+    li.appendChild(textSpan);
+
+    const downloadOneButton = document.createElement('button');
+    downloadOneButton.type = 'button';
+    downloadOneButton.className = 'download-one-button';
+    downloadOneButton.textContent = t('downloadOneLabel');
+    downloadOneButton.addEventListener('click', () => downloadSingleBook(book));
+    li.appendChild(downloadOneButton);
+
     bookList.appendChild(li);
   }
   results.hidden = false;
+}
+
+function downloadSingleBook(book) {
+  const blob = new Blob([book.markdown], { type: 'text/markdown' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = book.filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(link.href), 0);
 }
 
 /**

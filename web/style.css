@@ -67,6 +67,20 @@ body {
   border-bottom: 1px solid #eee;
 }
 
+.book-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.download-one-button {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
 #download-button {
   margin-top: 16px;
   padding: 10px 20px;
