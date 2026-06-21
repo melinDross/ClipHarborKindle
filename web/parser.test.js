@@ -274,6 +274,17 @@ test('parseEntries still parses a simple single-parenthesis title/author correct
   assert.equal(books[0].author, 'Some Author');
 });
 
+test('parseEntries does not split a block when "==========" appears inside a highlight\'s text rather than on its own line', () => {
+  const text = 'Some Title (Some Author)\n- Your Highlight on Page 1 | Loc. 1\n\nThis text contains ========== as a literal substring, not a delimiter.\n==========\n';
+  const books = parseEntries(text);
+  assert.equal(books.length, 1);
+  assert.equal(books[0].items.length, 1);
+  assert.equal(
+    books[0].items[0].text,
+    'This text contains ========== as a literal substring, not a delimiter.'
+  );
+});
+
 test('parseEntries returns an empty array for a file with no valid blocks', () => {
   assert.deepEqual(parseEntries(''), []);
   assert.deepEqual(parseEntries('==========\n==========\n'), []);

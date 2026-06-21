@@ -144,19 +144,32 @@ export function rangesOverlap(aStart, aEnd, bStart, bEnd) {
 
 /**
  * Ports parse_entries() from cli/parse_kindle_notion_v1_1e.py. Splits the raw
- * "My Clippings.txt" text on the "==========" delimiter, and for each block
- * extracts title/author from the first line and metadata from the second.
- * Blocks with fewer than 2 non-empty lines (e.g. trailing empty blocks) are
- * skipped, matching `if len(lines) < 2: continue` in the original.
+ * "My Clippings.txt" text into blocks on lines that are exactly "=========="
+ * (after trimming), rather than splitting on the substring anywhere in the
+ * text, so a highlight whose own text happens to contain "==========" isn't
+ * mistaken for the block delimiter. For each block, extracts title/author
+ * from the first line and metadata from the second. Blocks with fewer than
+ * 2 non-empty lines (e.g. trailing empty blocks) are skipped, matching
+ * `if len(lines) < 2: continue` in the original.
  */
 export function parseEntries(text) {
   const order = [];
   const byKey = new Map();
 
-  for (const block of text.split('==========')) {
-    const lines = block
-      .trim()
-      .split(/\r\n|\r|\n/)
+  const blocks = [];
+  let current = [];
+  for (const rawLine of text.split(/\r\n|\r|\n/)) {
+    if (rawLine.trim() === '==========') {
+      blocks.push(current);
+      current = [];
+    } else {
+      current.push(rawLine);
+    }
+  }
+  blocks.push(current);
+
+  for (const blockLines of blocks) {
+    const lines = blockLines
       .map((l) => l.replace(/^﻿+|﻿+$/g, '').trim())
       .filter((l) => l.length > 0);
     if (lines.length < 2) continue;
