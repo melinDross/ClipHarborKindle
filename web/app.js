@@ -73,4 +73,35 @@ fileInput.addEventListener('change', () => {
   if (file) handleFile(file);
 });
 
-export { currentBooks, downloadButton };
+function buildZipFilename() {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  return `kindle-notion-export-${yyyy}${mm}${dd}.zip`;
+}
+
+downloadButton.addEventListener('click', async () => {
+  downloadButton.disabled = true;
+  const originalLabel = downloadButton.textContent;
+  downloadButton.textContent = 'Generando…';
+
+  try {
+    const zip = new JSZip();
+    for (const book of currentBooks) {
+      zip.file(book.filename, book.markdown);
+    }
+    const blob = await zip.generateAsync({ type: 'blob' });
+
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = buildZipFilename();
+    link.click();
+    URL.revokeObjectURL(link.href);
+  } catch (err) {
+    showError('No se ha podido generar el .zip. Inténtalo de nuevo.');
+  } finally {
+    downloadButton.disabled = false;
+    downloadButton.textContent = originalLabel;
+  }
+});
