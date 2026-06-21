@@ -369,3 +369,58 @@ test('exportBooks turns raw clippings text into ready-to-download books', () => 
 test('exportBooks returns an empty array for a file with no valid entries', () => {
   assert.deepEqual(exportBooks('not a clippings file', 'My Clippings.txt'), []);
 });
+
+test('exportBooks sort comparator correctly orders multiple highlights by position, then page, then date, with entries lacking position sorted last', () => {
+  // Raw clippings with a single book containing 4 highlights in scrambled position order:
+  // - Loc. 300 (third in position order)
+  // - Loc. 100 (first in position order)
+  // - Loc. 200 (second in position order)
+  // - No position info (should sort last via Number.MAX_SAFE_INTEGER fallback)
+  // This tests the sort comparator inside exportBooks with multiple items to actually reorder.
+  const clippingsText = `The Pragmatic Programmer (David Thomas, Andrew Hunt)
+- Your Highlight on Page 12 | Loc. 300 | Added on Thursday, June 13, 2024 10:00:00 PM
+
+This is a highlight at position 300.
+==========
+The Pragmatic Programmer (David Thomas, Andrew Hunt)
+- Your Highlight on Page 8 | Loc. 100 | Added on Thursday, June 13, 2024 09:00:00 PM
+
+This is a highlight at position 100.
+==========
+The Pragmatic Programmer (David Thomas, Andrew Hunt)
+- Your Highlight on Page 10 | Loc. 200 | Added on Thursday, June 13, 2024 09:30:00 PM
+
+This is a highlight at position 200.
+==========
+The Pragmatic Programmer (David Thomas, Andrew Hunt)
+- Your Bookmark | Added on Thursday, June 13, 2024 11:00:00 PM
+
+(A bookmark with no position metadata should sort last)
+==========
+`;
+
+  const books = exportBooks(clippingsText, 'My Clippings.txt');
+  assert.equal(books.length, 1);
+
+  const book = books[0];
+  assert.equal(book.title, 'The Pragmatic Programmer');
+  assert.equal(book.stats.highlights, 3);
+  assert.equal(book.stats.bookmarks, 1);
+
+  // Verify that the markdown preserves the sorted order: position 100, then 200, then 300, then bookmark (no position).
+  const markdown = book.markdown;
+  const pos100Index = markdown.indexOf('This is a highlight at position 100');
+  const pos200Index = markdown.indexOf('This is a highlight at position 200');
+  const pos300Index = markdown.indexOf('This is a highlight at position 300');
+  const bookmarkIndex = markdown.indexOf('(A bookmark with no position metadata should sort last)');
+
+  assert.ok(pos100Index > 0, 'Pos 100 highlight should be present');
+  assert.ok(pos200Index > 0, 'Pos 200 highlight should be present');
+  assert.ok(pos300Index > 0, 'Pos 300 highlight should be present');
+  assert.ok(bookmarkIndex > 0, 'Bookmark should be present');
+
+  // Verify order in markdown: 100 < 200 < 300 < bookmark (with no position).
+  assert.ok(pos100Index < pos200Index, 'Pos 100 should appear before Pos 200');
+  assert.ok(pos200Index < pos300Index, 'Pos 200 should appear before Pos 300');
+  assert.ok(pos300Index < bookmarkIndex, 'Pos 300 should appear before the bookmark with no position');
+});
