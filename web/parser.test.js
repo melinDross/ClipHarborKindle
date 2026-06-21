@@ -83,3 +83,30 @@ test('detectEntryLang detects English from metadata keywords', () => {
 test('detectEntryLang returns null when no language signal is present', () => {
   assert.equal(detectEntryLang('???'), null);
 });
+
+import { parseAddedCompact } from './parser.js';
+
+test('parseAddedCompact formats an English date with PM', () => {
+  assert.equal(
+    parseAddedCompact('- Your Highlight on Page 6 | Loc. 49-50 | Added on Thursday, June 13, 2024 10:38:24 PM'),
+    '2024-06-13 22:38'
+  );
+});
+
+test('parseAddedCompact formats an English date with AM at 12 (midnight)', () => {
+  assert.equal(
+    parseAddedCompact('Added on Monday, January 1, 2024 12:15:00 AM'),
+    '2024-01-01 00:15'
+  );
+});
+
+test('parseAddedCompact formats a Spanish date', () => {
+  assert.equal(
+    parseAddedCompact('- El subrayado en la página 10 | posición 120-125 | Añadido el jueves, 13 de junio de 2024 22:38:24'),
+    '2024-06-13 22:38'
+  );
+});
+
+test('parseAddedCompact falls back to the raw text when the date does not match either pattern', () => {
+  assert.equal(parseAddedCompact('Added on some unparseable text'), 'some unparseable text');
+});

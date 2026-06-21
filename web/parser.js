@@ -80,3 +80,58 @@ export function detectEntryLang(meta) {
 
   return null;
 }
+
+const EN_MONTHS = {
+  January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
+  July: 7, August: 8, September: 9, October: 10, November: 11, December: 12,
+};
+const ES_MONTHS = {
+  enero: 1, febrero: 2, marzo: 3, abril: 4, mayo: 5, junio: 6,
+  julio: 7, agosto: 8, septiembre: 9, octubre: 10, noviembre: 11, diciembre: 12,
+};
+
+function pad2(n) {
+  return String(n).padStart(2, '0');
+}
+
+/**
+ * Ports parse_added_compact() from cli/parse_kindle_notion_v1_1e.py.
+ * Seconds are parsed (required to match the date patterns) but dropped from
+ * the output, matching DATE_FMT_COMPACT = "%Y-%m-%d %H:%M" in the original.
+ */
+export function parseAddedCompact(meta) {
+  const addedMatch = meta.match(/(Added on|Añadido el)\s+(.*)$/i);
+  const txt = addedMatch ? addedMatch[2].trim() : meta.trim();
+
+  const en = txt.match(
+    /^[A-Za-z]+,\s+([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})(?:\s*(AM|PM))?$/
+  );
+  if (en) {
+    const [, monthName, day, year, hourStr, minute, , ampm] = en;
+    const month = EN_MONTHS[monthName];
+    if (month) {
+      let hour = parseInt(hourStr, 10);
+      if (ampm) {
+        const upper = ampm.toUpperCase();
+        if (upper === 'PM' && hour !== 12) hour += 12;
+        if (upper === 'AM' && hour === 12) hour = 0;
+      }
+      return `${year}-${pad2(month)}-${pad2(day)} ${pad2(hour)}:${minute}`;
+    }
+  }
+
+  const es = txt.match(
+    /^[A-Za-zÁÉÍÓÚÑáéíóúñ]+,\s+(\d{1,2})\s+de\s+([A-Za-zÁÉÍÓÚÑáéíóúñ]+)\s+de\s+(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})$/
+  );
+  if (es) {
+    const [, day, monthName, year, hour, minute] = es;
+    const month = ES_MONTHS[monthName.toLowerCase()];
+    if (month) {
+      return `${year}-${pad2(month)}-${pad2(day)} ${pad2(parseInt(hour, 10))}:${minute}`;
+    }
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}$/.test(txt)) return txt;
+
+  return txt;
+}
