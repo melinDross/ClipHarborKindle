@@ -300,7 +300,3 @@ Reintroducir la deduplicación de v1.2 hasta tener una estrategia de comparació
 ## Repositorio
 
 [github.com/melinDross/Kindle-Enhanced-Clippings-Exporter](https://github.com/melinDross/Kindle-Enhanced-Clippings-Exporter)
-
----
-
-*Proyecto personal — Sam Barrado · QA Lead*
