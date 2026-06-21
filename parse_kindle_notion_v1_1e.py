@@ -46,7 +46,7 @@ for d in (OUTPUT_DIR, LOG_DIR, BACKUP_DIR):
 
 EN_MONTHS = {'January':1,'February':2,'March':3,'April':4,'May':5,'June':6,'July':7,'August':8,'September':9,'October':10,'November':11,'December':12}
 ES_MONTHS = {'enero':1,'febrero':2,'marzo':3,'abril':4,'mayo':5,'junio':6,'julio':7,'agosto':8,'septiembre':9,'octubre':10,'noviembre':11,'diciembre':12}
-DASH = r'[\\-–—]'
+DASH = r'[-–—]'
 
 def find_latest_clippings():
     files = sorted(INPUT_DIR.glob('My Clippings_*.txt'), key=lambda p: p.stat().st_mtime, reverse=True)
