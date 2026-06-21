@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { safeName, parsePos, parsePage, extractKind, detectEntryLang, parseAddedCompact, rangesOverlap, pairNotes, parseEntries, detectBookLang } from './parser.js';
+import { safeName, parsePos, parsePage, extractKind, detectEntryLang, parseAddedCompact, rangesOverlap, pairNotes, parseEntries, detectBookLang, renderBookMarkdown } from './parser.js';
 
 test('safeName strips punctuation and joins words with underscores', () => {
   assert.equal(safeName('Parque Jurásico (Z-Library)'), 'Parque_Jurásico_Z-Library');
@@ -307,4 +307,42 @@ test('detectBookLang defaults to "en" on a tie', () => {
 test('detectBookLang defaults to "en" when no entry has a detected language', () => {
   const items = [{ lang: null }, { lang: null }];
   assert.equal(detectBookLang(items), 'en');
+});
+
+test('renderBookMarkdown renders English labels, header stats, and a paired note', () => {
+  const items = [
+    {
+      kind: 'Highlight',
+      posLabel: 'Pos 49-50',
+      pageNum: 6,
+      added: '2024-06-13 22:38',
+      text: 'Developers everywhere talk about how hard it is to make games.',
+      noteText: 'This is a great point about crunch.',
+      metaOverrideKind: 'Note',
+    },
+  ];
+  const md = renderBookMarkdown('Blood, Sweat, and Pixels', 'Jason Schreier', items, 'en', 'My Clippings.txt');
+
+  assert.match(md, /^# Blood, Sweat, and Pixels/);
+  assert.match(md, /Author: Jason Schreier/);
+  assert.match(md, /Highlights: 1 \| Notes: 1 \| Bookmarks: 0/);
+  assert.match(md, /Source: My Clippings\.txt/);
+  assert.match(md, /— \*\*Note 👉🏼:\*\* _This is a great point about crunch\._/);
+  assert.match(md, /> 🟧 _Note \| Page 6 \| Pos 49-50 \| 2024-06-13 22:38_/);
+});
+
+test('renderBookMarkdown renders Spanish labels and a standalone bookmark with no text', () => {
+  const items = [
+    { kind: 'Bookmark', posLabel: '', pageNum: 50, added: '2024-06-14 08:00', text: '', noteText: '' },
+  ];
+  const md = renderBookMarkdown('Parque Jurásico', 'Michael Crichton', items, 'es', 'My Clippings.txt');
+
+  assert.match(md, /Marcadores: 1/);
+  assert.match(md, /- Bookmark at Page 50/);
+  assert.match(md, /> 🟩 _Marcador \| Página 50 \| 2024-06-14 08:00_/);
+});
+
+test('renderBookMarkdown omits the author line when there is no author', () => {
+  const md = renderBookMarkdown('Title Without Author', '', [], 'en', 'My Clippings.txt');
+  assert.doesNotMatch(md, /Author:/);
 });

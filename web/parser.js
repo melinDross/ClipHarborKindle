@@ -252,3 +252,69 @@ export function detectBookLang(items) {
   }
   return esCount > enCount ? 'es' : 'en';
 }
+
+const EMOJIS = { Highlight: '🟦', Note: '🟧', Bookmark: '🟩' };
+
+const KIND_MAP = {
+  en: { Highlight: 'Highlight', Note: 'Note', Bookmark: 'Bookmark', Page: 'Page', Highlights: 'Highlights', Notes: 'Notes', Bookmarks: 'Bookmarks', Author: 'Author', Processed: 'Processed', Source: 'Source' },
+  es: { Highlight: 'Subrayado', Note: 'Nota', Bookmark: 'Marcador', Page: 'Página', Highlights: 'Subrayados', Notes: 'Notas', Bookmarks: 'Marcadores', Author: 'Autor', Processed: 'Procesado', Source: 'Origen' },
+};
+
+function styleNote(note, lang) {
+  const label = lang === 'en' ? 'Note 👉🏼' : 'Nota 👉🏼';
+  return `**${label}:** _${note}_`;
+}
+
+function renderMeta(parts, metaKind) {
+  const meta = `_${parts.join(' | ')}_`;
+  const prefix = EMOJIS[metaKind] ? `${EMOJIS[metaKind]} ` : '';
+  return `> ${prefix}${meta}`;
+}
+
+/**
+ * Ports render_book_md() from cli/parse_kindle_notion_v1_1e.py. The original
+ * script's META_STYLE/EMOJI_IN_META/ENTRY_SEPARATOR config flags were all
+ * fixed at "blockquote"/true/"---" and never changed, so they're hardcoded
+ * here rather than ported as unused configurability (YAGNI).
+ */
+export function renderBookMarkdown(title, author, items, lang, sourceFilename) {
+  const kindMap = KIND_MAP[lang];
+
+  const nHigh = items.filter((it) => it.kind === 'Highlight').length;
+  const nNote = items.filter((it) => it.metaOverrideKind === 'Note' || it.kind === 'Note').length;
+  const nBook = items.filter((it) => it.kind === 'Bookmark').length;
+  const processedAt = new Date().toISOString().slice(0, 16).replace('T', ' ');
+
+  const lines = [`# ${title}`];
+  if (author) lines.push(`🖋️ ${kindMap.Author}: ${author}`);
+  lines.push(`🔖 ${kindMap.Highlights}: ${nHigh} | ${kindMap.Notes}: ${nNote} | ${kindMap.Bookmarks}: ${nBook}`);
+  lines.push(`📌 ${kindMap.Processed}: ${processedAt}`);
+  lines.push(`📂 ${kindMap.Source}: ${sourceFilename}`);
+  lines.push('', '---', '');
+
+  items.forEach((it, index) => {
+    if (index > 0) lines.push('');
+
+    const text = (it.text || '').trim();
+    const note = (it.noteText || '').trim();
+    let main = text;
+    if (it.kind === 'Bookmark' && !main) {
+      if (it.pageNum != null) main = `Bookmark at Page ${it.pageNum}`;
+      else if (it.posLabel) main = `Bookmark at ${it.posLabel}`;
+      else main = '(Bookmark)';
+    }
+    if (note) main += ` — ${styleNote(note, lang)}`;
+    lines.push(`- ${main}`);
+
+    const metaKind = note ? 'Note' : it.kind || 'Highlight';
+    const parts = [kindMap[metaKind] || metaKind];
+    if (it.pageNum != null) parts.push(`${kindMap.Page} ${it.pageNum}`);
+    if (it.posLabel) parts.push(it.posLabel);
+    if (it.added) parts.push(it.added);
+    lines.push(renderMeta(parts, metaKind));
+
+    lines.push('', '---', '');
+  });
+
+  return lines.join('\n');
+}
