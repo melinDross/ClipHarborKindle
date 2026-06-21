@@ -1,0 +1,56 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px;
+  color: #222;
+}
+
+.nav {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.drop-zone {
+  padding: 32px;
+  text-align: center;
+  border: 2px dashed #888;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.drop-zone.dragover {
+  border-color: #4a4;
+  background: #f3fff3;
+}
+
+.error {
+  padding: 12px;
+  border-radius: 6px;
+  background: #fde8e8;
+  color: #8a1f1f;
+}
+
+#book-list {
+  list-style: none;
+  padding: 0;
+}
+
+#book-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+#download-button {
+  margin-top: 16px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+#download-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
