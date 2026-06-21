@@ -10,6 +10,30 @@ body {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lang-switch {
+  display: flex;
+  gap: 4px;
+}
+
+.lang-button {
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  font-weight: 400;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.lang-button.active {
+  background: #eef;
+  border-color: #88a;
+  font-weight: 600;
 }
 
 .drop-zone {
