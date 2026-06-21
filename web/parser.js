@@ -306,7 +306,9 @@ export function exportBooks(text, sourceFilename) {
     books.push({
       title: group.title,
       author: group.author,
-      filename: `${safeName(group.title)}.md`,
+      filename: group.author
+        ? `${safeName(group.title)} (${safeName(group.author)}).md`
+        : `${safeName(group.title)}.md`,
       markdown,
       stats: {
         highlights: paired.filter((it) => it.kind === 'Highlight').length,

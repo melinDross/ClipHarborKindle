@@ -354,16 +354,27 @@ test('exportBooks turns raw clippings text into ready-to-download books', () => 
 
   const bsp = books.find((b) => b.title === 'Blood, Sweat, and Pixels');
   assert.equal(bsp.author, 'Jason Schreier');
-  assert.equal(bsp.filename, 'Blood Sweat and Pixels.md');
+  assert.equal(bsp.filename, 'Blood Sweat and Pixels (Jason Schreier).md');
   assert.equal(bsp.stats.highlights, 1);
   assert.equal(bsp.stats.notes, 1);
   assert.equal(bsp.stats.bookmarks, 0);
   assert.match(bsp.markdown, /^# Blood, Sweat, and Pixels/);
 
   const jurassic = books.find((b) => b.title === 'Parque Jurásico');
-  assert.equal(jurassic.filename, 'Parque Jurásico.md');
   assert.equal(jurassic.stats.bookmarks, 1);
   assert.match(jurassic.markdown, /Marcadores: 1/);
+});
+
+test('exportBooks includes the author in the filename to avoid collisions between same-titled books', () => {
+  const books = exportBooks(SAMPLE_CLIPPINGS, 'My Clippings.txt');
+  const jurassic = books.find((b) => b.title === 'Parque Jurásico');
+  assert.equal(jurassic.filename, 'Parque Jurásico (Michael Crichton).md');
+});
+
+test('exportBooks omits the parenthesized author segment in the filename when there is no author', () => {
+  const text = 'Title Without Author\n- Your Highlight on Page 1 | Loc. 1\n\nText.\n==========\n';
+  const books = exportBooks(text, 'My Clippings.txt');
+  assert.equal(books[0].filename, 'Title Without Author.md');
 });
 
 test('exportBooks returns an empty array for a file with no valid entries', () => {
