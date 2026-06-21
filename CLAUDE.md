@@ -40,27 +40,46 @@ parse_pos('Loc. 49-50')  # antes: ('Pos 49', 49, None) → ahora: ('Pos 49-50', 
 
 **Aplicado en:** `v1_1e` y `v1_2_1_fix` (v1_1d fue eliminado antes de aplicar el fix ahí).
 
-### 2. Duplicado de libro por regex título/autor mal formado (PENDIENTE)
+### 2. Duplicado de libro por regex título/autor mal formado (CORREGIDO solo en `web/parser.js`)
 
 Evidencia en `Books/`: existen `Parque_Jurasico.md` y `Parque_Jurásico.md` como ficheros separados para el mismo libro, con autor mal parseado en ambos (`Z-Library) (Michael Crichton`, `Jurassic Park) (Crichton, Michael`).
 
 **Causa:** el regex `^(?P<title>.+?)\s*\((?P<author>.+?)\)\s*$` no soporta paréntesis anidados tipo `Título (Z-Library) (Autor)`.
 
-**Pendiente:** arreglar el regex y fusionar manualmente ambos ficheros en uno.
+**Fix (2026-06-21, solo en `web/parser.js`, NO en `cli/parse_kindle_notion_v1_1e.py` — ver "Gobernanza del parsing"):** el regex pasó a `^(.+)\s*\(([^()]+)\)\s*$` (grupo de título *greedy*, grupo de autor sin paréntesis), de forma que siempre toma el último grupo de paréntesis sin anidar como autor. `"Parque Jurásico (Z-Library) (Michael Crichton)"` pasa a parsear `title="Parque Jurásico (Z-Library)"`, `author="Michael Crichton"`. Cubierto por tests en `web/parser.test.js`.
 
-### 3. Colisión de nombre de fichero por título únicamente (PENDIENTE)
+**Sigue pendiente:** fusionar manualmente los ficheros `Parque_Jurásico*.md` ya existentes en `Books/` (esto es limpieza de datos, no de código, y no se resuelve solo con el fix del regex). El `.py` sigue teniendo el bug si se usa directamente.
+
+### 3. Colisión de nombre de fichero por título únicamente (CORREGIDO solo en `web/parser.js`)
 
 `safe_name(title)` ignora el autor al generar el nombre del `.md`. Dos libros con mismo título y distinto autor podrían pisarse/mezclarse en el mismo fichero.
 
+**Fix (2026-06-21, solo en `web/parser.js`):** `exportBooks` genera el filename como `${safeName(title)} (${safeName(author)}).md` cuando hay autor (si no, `${safeName(title)}.md` como antes). De paso, `safeName()` dejó de convertir espacios en `_` y ahora solo los colapsa, para que el nombre del fichero sea más legible. El `.py` sigue sin el autor en el filename.
+
 ### 4. `errors='ignore'` en lectura del fichero fuente (PENDIENTE)
 
-`file.read_text(encoding='utf-8', errors='ignore')` descarta bytes mal formados sin avisar — riesgo de corrupción silenciosa de texto. Probablemente relacionado con el bug #2.
+`file.read_text(encoding='utf-8', errors='ignore')` descarta bytes mal formados sin avisar — riesgo de corrupción silenciosa de texto. Probablemente relacionado con el bug #2. Solo afecta al `.py` — la web lee con `FileReader.readAsText(file, 'utf-8')`, que no tiene un equivalente directo a `errors='ignore'` pero tampoco se ha auditado este caso ahí.
+
+## Ronda 2026-06-21: fixes de parser + descarga por libro + accesibilidad (solo `web/`)
+
+Ver spec completo en `docs/superpowers/specs/2026-06-21-parser-fixes-and-per-book-download-design.md` y plan en `docs/superpowers/plans/2026-06-21-parser-fixes-and-per-book-download.md`. Resumen de lo añadido a `web/parser.js`/`web/app.js`/`web/strings.js` (nada de esto toca el `.py`):
+
+- Bugs #2 y #3 de arriba, corregidos.
+- `detectBookLang` ahora vota sobre las entradas **sin fusionar** (antes perdía el idioma de una nota fusionada en un highlight por `pairNotes`).
+- Nuevo campo `langDetected` por libro (booleano informativo): si ninguna entrada tuvo idioma reconocido, la UI muestra un aviso "⚠️ Idioma no reconocido" en la fila del libro.
+- `parseEntries` ya no usa `text.split('==========')` (que rompía si un highlight contenía esa cadena literal como subcadena); ahora parte línea a línea, reconociendo el delimitador solo cuando ocupa una línea completa.
+- Botón de descarga individual por libro (además del zip de "descargar todo").
+- Accesibilidad básica: drop-zone navegable por teclado (`role="button"`, `Enter`/`Space`), `aria-pressed` en los botones de idioma, `aria-live` en mensajes de error y contador de libros.
+
+## Documentación externa actualizada
+
+- **README.md (2026-06-21):** reescrito para reflejar que `web/parser.js` es ahora la fuente de verdad y `cli/parse_kindle_notion_v1_1e.py` está congelado. Se mantuvo el formato narrativo de portfolio QA (origen, fases, decisiones, testing, historial de versiones) y se añadió una "Fase 5 — Migración a web" explicando el por qué de la migración y de la gobernanza de parsing. También se documentó ahí el cambio de criterio sobre tests automatizados (el CLI no los tiene por decisión consciente; la web sí, y se explica por qué cambió el contexto).
 
 ## Mejoras pendientes (por prioridad)
 
 1. ~~Arreglar regex `DASH`~~ — hecho
 2. Consolidar los scripts en uno solo (eliminar duplicación entre v1_1e y v1_2_1_fix)
-3. Arreglar regex título/autor + usar (título, autor) en el nombre de fichero
-4. Fusionar manualmente los `Parque_Jurásico*.md` duplicados
-5. Tests con fixtures cubriendo los edge cases ya documentados en el README
-6. Manejo explícito de errores de encoding en vez de `errors='ignore'`
+3. ~~Arreglar regex título/autor + usar (título, autor) en el nombre de fichero~~ — hecho, solo en `web/parser.js` (ver ronda 2026-06-21 arriba)
+4. Fusionar manualmente los `Parque_Jurásico*.md` duplicados ya existentes en `Books/`
+5. Tests con fixtures cubriendo los edge cases ya documentados en el README (para el `.py`; `web/parser.js` ya tiene su propia suite en `web/parser.test.js`)
+6. Manejo explícito de errores de encoding en vez de `errors='ignore'` (en el `.py`)

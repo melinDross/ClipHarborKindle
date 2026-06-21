@@ -1,13 +1,13 @@
 # Notion Scribe — Kindle Clippings Exporter
-### Proyecto de automatización y parsing | Python · CLI · Markdown · Notion
+### Proyecto de automatización y parsing | Python · CLI · JavaScript · Web · Markdown · Notion
 
 ---
 
 ## Qué es este proyecto
 
-Notion Scribe es una herramienta de línea de comandos que convierte automáticamente los subrayados y notas que hago en mi Kindle en archivos Markdown listos para importar a Notion.
+Notion Scribe es una herramienta que convierte automáticamente los subrayados y notas que hago en mi Kindle en archivos Markdown listos para importar a Notion. Nació como un script de línea de comandos en Python; hoy la versión activamente mantenida es una **web sin instalación**, pensada para cualquier persona, sin necesidad de tocar una terminal: **[melindross.github.io/Kindle-Enhanced-Clippings-Exporter](https://melindross.github.io/Kindle-Enhanced-Clippings-Exporter/)**. Arrastra tu `My Clippings.txt` y descarga el `.zip` (o cada `.md` por separado) — todo se procesa en tu navegador, el fichero nunca se envía a ningún servidor.
 
-**¿No usas la terminal?** Hay una versión web sin instalación, pensada para usuarios sin conocimientos técnicos: **[melindross.github.io/Kindle-Enhanced-Clippings-Exporter](https://melindross.github.io/Kindle-Enhanced-Clippings-Exporter/)**. Arrastra tu `My Clippings.txt` y descarga el `.zip` con los `.md` — todo se procesa en tu navegador, el fichero nunca se envía a ningún servidor.
+El script de Python original sigue en el repo y sigue funcionando para quien prefiera CLI, pero quedó **congelado** a partir de 2026-06-21: la lógica de parsing ya no se itera ahí, sino en la versión web (ver "Fase 5 — Migración a web" más abajo, en la sección "Cómo lo construí", para el por qué).
 
 ### El origen: una herramienta existente que se quedaba corta
 
@@ -48,11 +48,13 @@ A cualquier persona que use Kindle para leer y quiera llevar sus subrayados a un
 
 El caso de uso principal es el mío propio: leo con frecuencia, subrayo mucho y necesitaba poder revisar y buscar mis highlights en Notion sin el proceso manual de copiar y pegar entrada por entrada.
 
-Secundariamente, cualquier persona con conocimientos básicos de Python puede usarlo. No tiene ninguna dependencia externa —no hay `pip install`, no hay cuenta en ningún servicio. Solo Python 3.9+ y el fichero del Kindle.
+Hoy la mayoría de gente debería usar la versión web (no requiere nada instalado, solo un navegador). El CLI en Python sigue ahí para quien lo prefiera o ya lo tuviera integrado en su flujo: no tiene ninguna dependencia externa —no hay `pip install`, no hay cuenta en ningún servicio. Solo Python 3.9+ y el fichero del Kindle.
 
 ---
 
 ## Herramientas y tecnologías utilizadas
+
+### CLI original (Python — congelado, ver Fase 5)
 
 | Elemento | Detalle |
 |---|---|
@@ -60,11 +62,22 @@ Secundariamente, cualquier persona con conocimientos básicos de Python puede us
 | **Librerías estándar** | `re` (expresiones regulares), `pathlib` (rutas multiplataforma), `datetime` (fechas), `shutil` (copia de ficheros), `sys` |
 | **Formato de entrada** | Texto plano UTF-8 — `My Clippings.txt` del Kindle |
 | **Formato de salida** | Markdown (`.md`) con sintaxis compatible con Notion |
-| **Control de versiones** | Git + GitHub |
 | **Sistemas operativos** | macOS y Windows (documentados y probados en ambos) |
-| **Herramienta de destino** | Notion — import manual o mediante Notion Importer oficial |
 
 La decisión de no usar dependencias externas fue deliberada: una herramienta personal tiene que funcionar en cualquier momento sin tener que gestionar entornos virtuales ni versiones de paquetes. Cero fricción de instalación.
+
+### Versión web (JavaScript — activa, fuente de verdad actual)
+
+| Elemento | Detalle |
+|---|---|
+| **Lenguaje** | JavaScript (ES modules nativos, sin transpilar) |
+| **Build** | Ninguno — sin bundler, sin `npm install`, los módulos se cargan directamente en el navegador |
+| **Dependencias** | [JSZip](https://stuk.github.io/jszip/) vendorizado (`web/vendor/jszip.min.js`), solo para el botón de "descargar todo (.zip)" |
+| **Tests** | `node:test` + `node:assert` (built-in de Node, sin librería de testing externa) — `web/parser.test.js` |
+| **Hosting / deploy** | GitHub Pages, desplegado automáticamente vía GitHub Actions en cada push a `main` que toque `web/` |
+| **Accesibilidad** | `aria-live`, `aria-pressed`, drop-zone navegable por teclado |
+
+Ambas comparten **control de versiones** (Git + GitHub) y **herramienta de destino** (Notion — import manual o vía Notion Importer oficial).
 
 ---
 
@@ -128,11 +141,28 @@ Desarrollé la lógica y la probé, pero la descarté antes de mergearla. El mot
 
 **Decisión de QA:** mantener v1.1e como versión estable y cancelar v1.2 en lugar de publicar algo que funcionaba "casi siempre". Un fallo silencioso en este contexto —perder un highlight sin avisar— es peor que no tener la feature.
 
+### Fase 5 — Migración a web: `parser.js` pasa a ser la fuente de verdad
+
+v1.1e quedó como versión estable del CLI, pero seguía teniendo una barrera de entrada real: requería Python instalado, conocimiento mínimo de terminal, y clonar o descargar el repo. Para que cualquier persona con un Kindle pudiera usar la herramienta —no solo quien programa— decidí portar toda la lógica de parsing a JavaScript y ejecutarla 100% en el navegador, sin backend: arrastras el fichero, el procesado ocurre en tu máquina, descargas el resultado. Sin servidor de por medio, el `My Clippings.txt` (que puede contener años de notas personales) nunca sale de tu equipo.
+
+Esto planteó una pregunta de gobernanza inmediata: si ahora hay dos sitios con la misma lógica de parsing (el `.py` y el `.js`), ¿dónde se arreglan los bugs que vaya encontrando? Mantener dos implementaciones sincronizadas a mano, en dos lenguajes distintos, es una receta para divergencia silenciosa —arreglar algo en uno y olvidarlo en el otro hasta que alguien lo nota por accidente. Así que tomé una decisión explícita de gobernanza, documentada en `CLAUDE.md`:
+
+> **`web/parser.js` pasa a ser la fuente de verdad de la lógica de parsing.** `cli/parse_kindle_notion_v1_1e.py` queda **congelado**: sigue funcionando para quien lo ejecute por CLI, pero no recibe más fixes ni features de parsing. Toda mejora a partir de este punto se implementa solo en `parser.js`.
+
+Con esa decisión tomada, la primera ronda de trabajo sobre la web fue un MVP funcional (drag&drop → parseo → descarga `.zip`) más un selector de idioma de interfaz (ES/EN, independiente del idioma de los `.md` generados). La segunda ronda —ya con el CLI oficialmente congelado— resolvió varios bugs que llevaban tiempo documentados como pendientes y que decidí **no portar al `.py`**, sino corregir únicamente en `parser.js`:
+
+- **Colisión de nombre de fichero por título duplicado.** Dos libros con el mismo título y autor distinto podían pisarse el `.md` el uno al otro. El nombre de fichero ahora incluye el autor.
+- **Regex título/autor roto con paréntesis anidados.** Títulos del tipo `"Libro (Z-Library) (Autor)"` (típico cuando el ebook viene de una fuente no oficial) se parseaban mal — el autor capturaba `"Z-Library"` en vez del nombre real. Esto generaba duplicados reales en `Books/` (ver bug #2 en `CLAUDE.md`).
+- **Idioma de Kindle no soportado, sin aviso.** Si el dispositivo estaba en un idioma distinto de inglés/español, el libro se exportaba igualmente pero sin que nadie se enterase de que el idioma no se había podido detectar. Ahora se marca con un aviso visible en la lista de resultados.
+- Además: detección de idioma más robusta cuando una nota se fusiona dentro de un highlight, split de bloques a prueba del delimitador `==========` apareciendo dentro del propio texto de un highlight, descarga individual por libro (no solo el `.zip` completo), y accesibilidad básica (teclado, `aria-live`, `aria-pressed`).
+
+Esta ronda fue también la primera vez que el proyecto incorporó **tests automatizados** — ver la sección de testing más abajo para el porqué de ese cambio de criterio respecto al CLI.
+
 ---
 
 ## Resultado: output en Notion
 
-El resultado final de ejecutar el script es un `.md` por libro que, al importarlo en Notion, se ve así:
+El resultado final —ya sea con el CLI o con la web— es un `.md` por libro que, al importarlo en Notion, se ve así:
 
 ![Output en Notion — Cómo ganar amigos e influir sobre las personas](notion-output-como-ganar-amigos.png)
 
@@ -142,9 +172,9 @@ Cada libro tiene una cabecera con autor, recuento de highlights/notas/bookmarks,
 
 ## Cómo lo he ido testando
 
-No hay tests unitarios automatizados en este proyecto, y es una decisión consciente que merece explicación.
+El CLI no tiene tests unitarios automatizados, y es una decisión consciente que merece explicación. La web sí los tiene — ver "Por qué ese criterio cambió en la versión web" más abajo.
 
-### Enfoque de validación manual estructurada
+### Enfoque de validación manual estructurada (CLI)
 
 El testing fue manual e iterativo, pero con un criterio claro en cada ciclo:
 
@@ -176,11 +206,21 @@ Al pasar de v1.1d a v1.1e, ejecuté ambas versiones sobre el mismo fichero de en
 **5. Validación en destino**
 El test final siempre fue importar el output en Notion y verificar que el formato sobrevive al import: que los bullets se renderizan como lista, que los blockquotes aparecen como blockquotes, y que los separadores `---` funcionan como divisores visuales.
 
-### Por qué no automaticé los tests
+### Por qué no automaticé los tests (en el CLI)
 
 Añadir tests unitarios habría requerido crear fixtures de `My Clippings.txt` con casos conocidos. Es factible, pero supone un trabajo adicional que no estaba justificado para una herramienta de uso personal con un único contribuidor. El riesgo de regresión lo gestioné con la comparación manual entre versiones y con el backup automático incorporado al propio script —que actúa como red de seguridad ante cualquier fallo inesperado.
 
 Si el proyecto escalara a múltiples contribuidores, o si el formato de Amazon cambiase con frecuencia, los tests automatizados serían el siguiente paso natural.
+
+### Por qué ese criterio cambió en la versión web
+
+La versión web sí tiene tests automatizados desde su primera línea de código (`web/parser.test.js`, usando `node:test`/`node:assert` —built-in de Node, sin dependencia externa— actualmente 53 casos, todos sobre comportamiento real, no sobre mocks). No es una contradicción con el razonamiento anterior, sino el mismo criterio de QA aplicado a un contexto distinto:
+
+- **El "único contribuidor" deja de ser literal.** El desarrollo de la web se hace en rondas con múltiples subagentes trabajando tarea a tarea sobre el mismo código (`parser.js`, `app.js`, `strings.js`). Sin una suite que se ejecute en segundos tras cada cambio, cada subagente tendría que re-verificar manualmente todo lo que ya funcionaba — exactamente el tipo de regresión silenciosa que un test detecta gratis.
+- **La superficie de cambio es mayor y más entrelazada.** Cada ronda toca varias funciones que se llaman entre sí (`parseEntries` → `pairNotes` → `detectBookLang` → `exportBooks`). Una comparación manual línea a línea —el método usado para v1.1d→v1.1e— deja de ser practicable cuando hay 8-9 commits pequeños e interdependientes en una sola sesión de trabajo.
+- **El coste de automatizar bajó.** `node:test` viene incluido en Node sin instalar nada, y no hace falta levantar un navegador: las funciones de parsing son puras (texto en, objetos en, sin DOM), así que testearlas es tan simple como en Python — el motivo original para no automatizar (esfuerzo no justificado) deja de aplicar.
+
+El criterio de fondo no cambió: **automatizar cuando el coste de no hacerlo supera al de hacerlo.** En el CLI personal de un solo contribuidor, no lo superaba. En una web que itera con un flujo multi-agente y revisiones por tarea, sí.
 
 ---
 
@@ -192,7 +232,9 @@ Si el proyecto escalara a múltiples contribuidores, o si el formato de Amazon c
 
 **Separadores `---` en el output.** Notion tiene comportamientos inconsistentes con algunos elementos Markdown. Los separadores horizontales son uno de los pocos elementos que se renderizan de forma fiable en imports. La elección no fue estética, fue funcional.
 
-**Multiidioma configurable, no automático.** La detección automática del idioma por libro fue evaluada y descartada porque generaba falsos positivos en títulos con palabras en varios idiomas. El enfoque de configuración explícita (`PER_BOOK_LANG`) es menos "mágico" pero más predecible y menos propenso a errores silenciosos.
+**Multiidioma configurable, no automático (en el CLI).** La detección automática del idioma por libro fue evaluada y descartada en el `.py` porque generaba falsos positivos en títulos con palabras en varios idiomas. El enfoque de configuración explícita (`PER_BOOK_LANG`) es menos "mágico" pero más predecible y menos propenso a errores silenciosos. En la web sí se implementó detección automática por mayoría de voto entre las entradas de cada libro (`detectBookLang`), con un aviso explícito cuando ninguna entrada tiene idioma reconocible — la diferencia es que ahora el fallo se hace visible en vez de silencioso.
+
+**Una sola fuente de verdad para el parsing, no dos sincronizadas a mano.** Al portar la lógica a JavaScript, la alternativa habría sido mantener `.py` y `.js` arreglando los mismos bugs en paralelo. Se descartó deliberadamente: la sincronización manual entre dos lenguajes es un mecanismo de divergencia silenciosa, justo el tipo de fallo que este proyecto trata de evitar en el output final. Se eligió congelar el CLI en vez de duplicar esfuerzo (ver Fase 5).
 
 ---
 
@@ -201,18 +243,27 @@ Si el proyecto escalara a múltiples contribuidores, o si el formato de Amazon c
 ```
 Kindle-Enhanced-Clippings-Exporter/
 ├── cli/
-│   ├── parse_kindle_notion_v1_1e.py       # Script principal (versión estable, congelado)
+│   ├── parse_kindle_notion_v1_1e.py       # Script principal (congelado, ver Fase 5)
 │   └── parse_kindle_notion_v1_2_1_fix.py  # Experimento cancelado (v1.2)
-├── web/                                   # Exportador web (en desarrollo), ver docs/superpowers/specs/
+├── web/                                   # Exportador web — fuente de verdad del parsing
+│   ├── index.html
+│   ├── parser.js                          # Lógica de parsing (puerto de cli/parse_kindle_notion_v1_1e.py + fixes propios)
+│   ├── parser.test.js                     # Suite de tests (node:test) — ver sección de testing
+│   ├── app.js                             # UI: drag&drop, render de resultados, descargas
+│   ├── strings.js                         # Copy de interfaz ES/EN
+│   ├── style.css
+│   └── vendor/jszip.min.js                # Única dependencia, vendorizada (solo para el .zip)
+├── docs/superpowers/                      # Specs y planes de cada ronda de desarrollo de la web
 ├── README.md
+├── CLAUDE.md                              # Memoria técnica: bugs, decisiones, gobernanza del parsing
 ├── Books/                                 # Output: un .md por libro
-├── backups/                               # Copias del My Clippings.txt con timestamp
+├── backups/                               # Copias del My Clippings.txt con timestamp (solo CLI)
 └── .gitignore
 ```
 
-Se ejecuta desde la raíz del repo (ej. `python3 cli/parse_kindle_notion_v1_1e.py`), para que las rutas relativas (`Books/`, `backups/`, `logs/`) sigan resolviendo correctamente.
+El CLI se ejecuta desde la raíz del repo (ej. `python3 cli/parse_kindle_notion_v1_1e.py`), para que las rutas relativas (`Books/`, `backups/`, `logs/`) sigan resolviendo correctamente. La web no necesita instalación: se sirve estática (GitHub Pages) o abriendo `web/index.html` directamente.
 
-`parse_kindle_notion_v1_1e.py` está congelado: la lógica de parsing ya no se itera aquí, sino en `web/parser.js` (ver `CLAUDE.md`).
+`parse_kindle_notion_v1_1e.py` está congelado: la lógica de parsing ya no se itera aquí, sino en `web/parser.js` (ver Fase 5 y `CLAUDE.md`).
 
 ---
 
@@ -220,9 +271,11 @@ Se ejecuta desde la raíz del repo (ej. `python3 cli/parse_kindle_notion_v1_1e.p
 
 | Versión | Estado | Cambios principales | Motivo |
 |---|---|---|---|
-| v1.1d | Estable (retirada) | Parsing completo, pareado nota–highlight, multiidioma, output Notion-friendly | Base funcional sólida |
-| v1.1e | **Estable actual** | Backup automático antes de cada ejecución, log de ejecución con trazabilidad completa | Reducción de riesgo operacional |
-| v1.2 | Cancelada | Deduplicación de highlights ya exportados | Falsos negativos inaceptables: riesgo de perder anotaciones silenciosamente |
+| v1.1d (CLI) | Estable (retirada) | Parsing completo, pareado nota–highlight, multiidioma, output Notion-friendly | Base funcional sólida |
+| v1.1e (CLI) | **Congelada** (ver Fase 5) | Backup automático antes de cada ejecución, log de ejecución con trazabilidad completa | Reducción de riesgo operacional |
+| v1.2 (CLI) | Cancelada | Deduplicación de highlights ya exportados | Falsos negativos inaceptables: riesgo de perder anotaciones silenciosamente |
+| Web — MVP | Estable | Mismo motor de parsing portado a JS, ejecución 100% en navegador, descarga `.zip`, selector de idioma de interfaz ES/EN | Acceso sin instalación para usuarios sin conocimientos técnicos |
+| Web — fixes + descarga por libro + a11y | **Estable actual / fuente de verdad** | Fix colisión de nombre de fichero, fix regex título/autor con paréntesis anidados, aviso de idioma no reconocido, descarga individual por libro, accesibilidad básica, primera suite de tests automatizados (53 tests) | Bugs reales encontrados en `Books/`; el CLI ya no recibe estos fixes por la gobernanza de parsing |
 
 ---
 
@@ -230,10 +283,11 @@ Se ejecuta desde la raíz del repo (ej. `python3 cli/parse_kindle_notion_v1_1e.p
 
 **Lo que haría si continuase el proyecto:**
 
-- **Tests unitarios con fixtures**: crear un conjunto de fragmentos de `My Clippings.txt` que cubran todos los edge cases identificados y verificarlos automáticamente en cada cambio.
+- ~~Tests unitarios con fixtures~~ — hecho en la web (`web/parser.test.js`, 53 tests). Sigue pendiente para el CLI si alguna vez se retomase su desarrollo, aunque dado que está congelado no es prioritario.
 - **Integración con la API de Notion**: en lugar de generar `.md` para import manual, crear o actualizar páginas directamente vía API. La limitación actual es que requiere un token de integración y es más complejo de configurar para usuarios no técnicos.
 - **Modo dry-run**: ejecutar el script sin escribir ningún fichero, solo mostrando qué se procesaría. Útil para verificar el parsing antes de sobreescribir los outputs.
-- **Soporte para más idiomas de Kindle**: el formato de metadatos varía en dispositivos configurados en francés, alemán o portugués. Actualmente solo inglés y español están cubiertos.
+- **Soporte para más idiomas de Kindle**: el formato de metadatos varía en dispositivos configurados en francés, alemán o portugués. Actualmente solo inglés y español están cubiertos (tanto en el CLI como en la web).
+- **Fusionar manualmente los `Parque_Jurásico*.md` duplicados** en `Books/`, generados por el bug #2 del regex título/autor antes de corregirse (ver `CLAUDE.md`).
 
 **Lo que no haría:**
 
