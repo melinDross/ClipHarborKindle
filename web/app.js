@@ -1,4 +1,5 @@
 import { exportBooks } from './parser.js';
+import { STRINGS, detectInitialLang } from './strings.js';
 
 const dropZone = document.getElementById('drop-zone');
 const fileInput = document.getElementById('file-input');
@@ -7,33 +8,64 @@ const results = document.getElementById('results');
 const bookCount = document.getElementById('book-count');
 const bookList = document.getElementById('book-list');
 const downloadButton = document.getElementById('download-button');
+const langEsButton = document.getElementById('lang-es');
+const langEnButton = document.getElementById('lang-en');
 
 let currentBooks = [];
+let currentLang = detectInitialLang();
+let lastErrorKey = null;
 
-function showError(message) {
-  errorMessage.textContent = message;
+function t(key) {
+  return STRINGS[currentLang][key];
+}
+
+function showError(key) {
+  lastErrorKey = key;
+  errorMessage.textContent = t(key);
   errorMessage.hidden = false;
   results.hidden = true;
 }
 
 function renderBooks(books) {
   currentBooks = books;
+  lastErrorKey = null;
   errorMessage.hidden = true;
 
   if (books.length === 0) {
-    showError('No se ha podido leer ningún highlight de este fichero. ¿Es el "My Clippings.txt" correcto?');
+    showError('noHighlights');
     return;
   }
 
-  bookCount.textContent = `${books.length} libro(s) detectado(s)`;
+  bookCount.textContent = t('bookCount')(books.length);
   bookList.innerHTML = '';
   for (const book of books) {
     const li = document.createElement('li');
-    const authorPart = book.author ? ` — ${book.author}` : '';
-    li.textContent = `${book.title}${authorPart} — ${book.stats.highlights} highlights, ${book.stats.notes} notas, ${book.stats.bookmarks} marcadores`;
+    li.textContent = t('bookListItem')(book);
     bookList.appendChild(li);
   }
   results.hidden = false;
+}
+
+/**
+ * Switches the UI language, persists the choice, and re-renders whatever
+ * is currently on screen (the drop zone copy always; the error message or
+ * book list only if one of them is currently visible).
+ */
+function applyLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('uiLang', lang);
+
+  dropZone.innerHTML = t('dropZone');
+  if (!downloadButton.disabled) downloadButton.textContent = t('downloadLabel');
+  langEsButton.classList.toggle('active', lang === 'es');
+  langEnButton.classList.toggle('active', lang === 'en');
+
+  if (!errorMessage.hidden && lastErrorKey) {
+    errorMessage.textContent = t(lastErrorKey);
+  }
+  if (!results.hidden && currentBooks.length > 0) {
+    renderBooks(currentBooks);
+  }
 }
 
 function handleFile(file) {
@@ -43,10 +75,10 @@ function handleFile(file) {
       const books = exportBooks(reader.result, file.name);
       renderBooks(books);
     } catch (err) {
-      showError('No se ha podido procesar el fichero. ¿Es el "My Clippings.txt" correcto?');
+      showError('processError');
     }
   };
-  reader.onerror = () => showError('No se ha podido leer el fichero seleccionado.');
+  reader.onerror = () => showError('readError');
   reader.readAsText(file, 'utf-8');
 }
 
@@ -73,6 +105,9 @@ fileInput.addEventListener('change', () => {
   if (file) handleFile(file);
 });
 
+langEsButton.addEventListener('click', () => applyLang('es'));
+langEnButton.addEventListener('click', () => applyLang('en'));
+
 function buildZipFilename() {
   const now = new Date();
   const yyyy = now.getFullYear();
@@ -83,8 +118,7 @@ function buildZipFilename() {
 
 downloadButton.addEventListener('click', async () => {
   downloadButton.disabled = true;
-  const originalLabel = downloadButton.textContent;
-  downloadButton.textContent = 'Generando…';
+  downloadButton.textContent = t('generatingLabel');
 
   try {
     const zip = new JSZip();
@@ -99,9 +133,11 @@ downloadButton.addEventListener('click', async () => {
     link.click();
     URL.revokeObjectURL(link.href);
   } catch (err) {
-    showError('No se ha podido generar el .zip. Inténtalo de nuevo.');
+    showError('zipError');
   } finally {
     downloadButton.disabled = false;
-    downloadButton.textContent = originalLabel;
+    downloadButton.textContent = t('downloadLabel');
   }
 });
+
+applyLang(currentLang);
