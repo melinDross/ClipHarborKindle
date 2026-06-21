@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { safeName, parsePos, parsePage, extractKind, detectEntryLang, parseAddedCompact, rangesOverlap, pairNotes, parseEntries } from './parser.js';
+import { safeName, parsePos, parsePage, extractKind, detectEntryLang, parseAddedCompact, rangesOverlap, pairNotes, parseEntries, detectBookLang } from './parser.js';
 
 test('safeName strips punctuation and joins words with underscores', () => {
   assert.equal(safeName('Parque Jurásico (Z-Library)'), 'Parque_Jurásico_Z-Library');
@@ -292,4 +292,19 @@ Second book's highlight.
   assert.equal(books[1].author, 'Baz');
   assert.equal(books[1].items.length, 1);
   assert.equal(books[1].items[0].text, "Second book's highlight.");
+});
+
+test('detectBookLang picks the majority language across entries', () => {
+  const items = [{ lang: 'es' }, { lang: 'es' }, { lang: 'en' }, { lang: null }];
+  assert.equal(detectBookLang(items), 'es');
+});
+
+test('detectBookLang defaults to "en" on a tie', () => {
+  const items = [{ lang: 'es' }, { lang: 'en' }];
+  assert.equal(detectBookLang(items), 'en');
+});
+
+test('detectBookLang defaults to "en" when no entry has a detected language', () => {
+  const items = [{ lang: null }, { lang: null }];
+  assert.equal(detectBookLang(items), 'en');
 });

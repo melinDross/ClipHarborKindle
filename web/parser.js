@@ -236,3 +236,19 @@ export function pairNotes(items) {
   }
   return out;
 }
+
+/**
+ * New in the web port (see CLAUDE.md "Gobernanza del parsing"). Replaces
+ * v1_1e's static PER_BOOK_LANG/OUTPUT_LANG_DEFAULT config with a real
+ * majority vote over each entry's detected language. Ties and "no signal at
+ * all" both fall back to 'en', matching v1_1e's OUTPUT_LANG_DEFAULT.
+ */
+export function detectBookLang(items) {
+  let esCount = 0;
+  let enCount = 0;
+  for (const it of items) {
+    if (it.lang === 'es') esCount++;
+    if (it.lang === 'en') enCount++;
+  }
+  return esCount > enCount ? 'es' : 'en';
+}
