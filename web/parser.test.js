@@ -53,3 +53,33 @@ test('parsePage parses Spanish "página" metadata', () => {
 test('parsePage returns null when there is no page metadata', () => {
   assert.equal(parsePage('Your Highlight | Loc. 49-50'), null);
 });
+
+import { extractKind, detectEntryLang } from './parser.js';
+
+test('extractKind recognizes English highlight/note/bookmark', () => {
+  assert.equal(extractKind('Your Highlight on Page 6'), 'Highlight');
+  assert.equal(extractKind('Your Note on Page 6'), 'Note');
+  assert.equal(extractKind('Your Bookmark on Page 6'), 'Bookmark');
+});
+
+test('extractKind recognizes Spanish highlight/note/bookmark', () => {
+  assert.equal(extractKind('El subrayado en la página 10'), 'Highlight');
+  assert.equal(extractKind('La nota en la página 10'), 'Note');
+  assert.equal(extractKind('Tu marcador en la página 10'), 'Bookmark');
+});
+
+test('extractKind defaults to Highlight when nothing matches', () => {
+  assert.equal(extractKind('something unrecognized'), 'Highlight');
+});
+
+test('detectEntryLang detects Spanish from metadata keywords', () => {
+  assert.equal(detectEntryLang('El subrayado en la página 10 | Añadido el jueves, 13 de junio de 2024'), 'es');
+});
+
+test('detectEntryLang detects English from metadata keywords', () => {
+  assert.equal(detectEntryLang('Your Highlight on Page 6 | Added on Thursday, June 13, 2024'), 'en');
+});
+
+test('detectEntryLang returns null when no language signal is present', () => {
+  assert.equal(detectEntryLang('???'), null);
+});
