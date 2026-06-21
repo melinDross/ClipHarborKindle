@@ -7,6 +7,8 @@
 
 Notion Scribe es una herramienta de línea de comandos que convierte automáticamente los subrayados y notas que hago en mi Kindle en archivos Markdown listos para importar a Notion.
 
+**¿No usas la terminal?** Hay una versión web sin instalación, pensada para usuarios sin conocimientos técnicos: **[melindross.github.io/Kindle-Enhanced-Clippings-Exporter](https://melindross.github.io/Kindle-Enhanced-Clippings-Exporter/)**. Arrastra tu `My Clippings.txt` y descarga el `.zip` con los `.md` — todo se procesa en tu navegador, el fichero nunca se envía a ningún servidor.
+
 ### El origen: una herramienta existente que se quedaba corta
 
 El punto de partida no fue una idea abstracta, sino una frustración concreta. Probé [clippings.io](https://clippings.io), una herramienta de terceros para exportar highlights de Kindle, y el resultado no me convencía: el formato era plano, sin estructura visual útil, sin metadatos relevantes, y sin ningún tipo de asociación entre notas y subrayados.
