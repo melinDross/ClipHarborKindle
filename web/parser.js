@@ -143,6 +143,58 @@ export function rangesOverlap(aStart, aEnd, bStart, bEnd) {
 }
 
 /**
+ * Ports parse_entries() from cli/parse_kindle_notion_v1_1e.py. Splits the raw
+ * "My Clippings.txt" text on the "==========" delimiter, and for each block
+ * extracts title/author from the first line and metadata from the second.
+ * Blocks with fewer than 2 non-empty lines (e.g. trailing empty blocks) are
+ * skipped, matching `if len(lines) < 2: continue` in the original.
+ */
+export function parseEntries(text) {
+  const order = [];
+  const byKey = new Map();
+
+  for (const block of text.split('==========')) {
+    const lines = block
+      .trim()
+      .split(/\r\n|\r|\n/)
+      .map((l) => l.replace(/^﻿+|﻿+$/g, '').trim())
+      .filter((l) => l.length > 0);
+    if (lines.length < 2) continue;
+
+    const [titleLine, metaLine] = lines;
+    const content = lines.slice(2).join('\n').trim();
+
+    const titleMatch = titleLine.match(/^(.+?)\s*\((.+?)\)\s*$/);
+    const title = titleMatch ? titleMatch[1].trim() : titleLine.trim();
+    const author = titleMatch ? titleMatch[2].trim() : '';
+
+    const pos = parsePos(metaLine);
+    const entry = {
+      kind: extractKind(metaLine),
+      posLabel: pos.label,
+      posStart: pos.start,
+      posEnd: pos.end,
+      pageNum: parsePage(metaLine),
+      added: parseAddedCompact(metaLine),
+      text: content,
+      metaRaw: metaLine,
+      lang: detectEntryLang(metaLine),
+      noteText: undefined,
+    };
+
+    const key = `${title} ${author}`;
+    if (!byKey.has(key)) {
+      const group = { title, author, items: [] };
+      byKey.set(key, group);
+      order.push(group);
+    }
+    byKey.get(key).items.push(entry);
+  }
+
+  return order;
+}
+
+/**
  * Ports pair_notes() from cli/parse_kindle_notion_v1_1e.py. Walks entries in
  * order; a Note is merged into the most recent Highlight whose position range
  * overlaps it (or whose page number matches, as a fallback), otherwise it is

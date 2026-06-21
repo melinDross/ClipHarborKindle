@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { safeName, parsePos, parsePage, extractKind, detectEntryLang, parseAddedCompact, rangesOverlap, pairNotes } from './parser.js';
+import { safeName, parsePos, parsePage, extractKind, detectEntryLang, parseAddedCompact, rangesOverlap, pairNotes, parseEntries } from './parser.js';
 
 test('safeName strips punctuation and joins words with underscores', () => {
   assert.equal(safeName('Parque Jurásico (Z-Library)'), 'Parque_Jurásico_Z-Library');
@@ -200,4 +200,67 @@ test('pairNotes joins multiple notes attached to the same highlight with a space
   assert.equal(result[0].noteText, 'First note. Second note.');
   assert.equal(result[0].text, 'Highlight text.');
   assert.equal(result[0].metaOverrideKind, 'Note');
+});
+
+const SAMPLE_CLIPPINGS = `Blood, Sweat, and Pixels (Jason Schreier)
+- Your Highlight on Page 6 | Loc. 49-50 | Added on Thursday, June 13, 2024 10:38:24 PM
+
+Developers everywhere talk about how hard it is to make games.
+==========
+Blood, Sweat, and Pixels (Jason Schreier)
+- Your Note on Page 6 | Loc. 49-50 | Added on Thursday, June 13, 2024 10:40:00 PM
+
+This is a great point about crunch.
+==========
+Parque Jurásico (Michael Crichton)
+- Tu marcador en la página 50 | Añadido el viernes, 14 de junio de 2024 08:00:00
+==========
+`;
+
+test('parseEntries groups entries by (title, author) and extracts fields', () => {
+  const books = parseEntries(SAMPLE_CLIPPINGS);
+  assert.equal(books.length, 2);
+
+  const [bsp, jurassic] = books;
+  assert.equal(bsp.title, 'Blood, Sweat, and Pixels');
+  assert.equal(bsp.author, 'Jason Schreier');
+  assert.equal(bsp.items.length, 2);
+  assert.equal(bsp.items[0].kind, 'Highlight');
+  assert.equal(bsp.items[0].posStart, 49);
+  assert.equal(bsp.items[0].posEnd, 50);
+  assert.equal(bsp.items[0].text, 'Developers everywhere talk about how hard it is to make games.');
+  assert.equal(bsp.items[0].lang, 'en');
+  assert.equal(bsp.items[1].kind, 'Note');
+
+  assert.equal(jurassic.title, 'Parque Jurásico');
+  assert.equal(jurassic.author, 'Michael Crichton');
+  assert.equal(jurassic.items.length, 1);
+  assert.equal(jurassic.items[0].kind, 'Bookmark');
+  assert.equal(jurassic.items[0].text, '');
+  assert.equal(jurassic.items[0].lang, 'es');
+});
+
+test('parseEntries skips malformed blocks with fewer than 2 lines', () => {
+  const text = 'Some Title (Some Author)\n- Your Highlight on Page 1 | Loc. 1\n\nFirst entry text.\n==========\n\n==========\n';
+  const books = parseEntries(text);
+  assert.equal(books.length, 1);
+  assert.equal(books[0].items.length, 1);
+});
+
+test('parseEntries strips a leading BOM character from lines', () => {
+  const text = '﻿Some Title (Some Author)\n- Your Highlight on Page 1 | Loc. 1\n\nText.\n==========\n';
+  const books = parseEntries(text);
+  assert.equal(books[0].title, 'Some Title');
+});
+
+test('parseEntries treats a title with no parenthesized author as author-less', () => {
+  const text = 'Title Without Author\n- Your Highlight on Page 1 | Loc. 1\n\nText.\n==========\n';
+  const books = parseEntries(text);
+  assert.equal(books[0].title, 'Title Without Author');
+  assert.equal(books[0].author, '');
+});
+
+test('parseEntries returns an empty array for a file with no valid blocks', () => {
+  assert.deepEqual(parseEntries(''), []);
+  assert.deepEqual(parseEntries('==========\n==========\n'), []);
 });
