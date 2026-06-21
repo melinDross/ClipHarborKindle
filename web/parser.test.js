@@ -2,12 +2,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { safeName, parsePos, parsePage, extractKind, detectEntryLang, parseAddedCompact, rangesOverlap, pairNotes, parseEntries, detectBookLang, renderBookMarkdown, exportBooks } from './parser.js';
 
-test('safeName strips punctuation and joins words with underscores', () => {
-  assert.equal(safeName('Parque Jurásico (Z-Library)'), 'Parque_Jurásico_Z-Library');
+test('safeName strips punctuation and joins words with a single space', () => {
+  assert.equal(safeName('Parque Jurásico (Z-Library)'), 'Parque Jurásico Z-Library');
 });
 
 test('safeName collapses multiple spaces and trims', () => {
-  assert.equal(safeName('  Hábitos   atómicos  '), 'Hábitos_atómicos');
+  assert.equal(safeName('  Hábitos   atómicos  '), 'Hábitos atómicos');
 });
 
 test('safeName keeps hyphens and underscores as-is', () => {
@@ -354,14 +354,14 @@ test('exportBooks turns raw clippings text into ready-to-download books', () => 
 
   const bsp = books.find((b) => b.title === 'Blood, Sweat, and Pixels');
   assert.equal(bsp.author, 'Jason Schreier');
-  assert.equal(bsp.filename, 'Blood_Sweat_and_Pixels.md');
+  assert.equal(bsp.filename, 'Blood Sweat and Pixels.md');
   assert.equal(bsp.stats.highlights, 1);
   assert.equal(bsp.stats.notes, 1);
   assert.equal(bsp.stats.bookmarks, 0);
   assert.match(bsp.markdown, /^# Blood, Sweat, and Pixels/);
 
   const jurassic = books.find((b) => b.title === 'Parque Jurásico');
-  assert.equal(jurassic.filename, 'Parque_Jurásico.md');
+  assert.equal(jurassic.filename, 'Parque Jurásico.md');
   assert.equal(jurassic.stats.bookmarks, 1);
   assert.match(jurassic.markdown, /Marcadores: 1/);
 });
