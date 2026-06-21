@@ -4,5 +4,6 @@
     "statusBar.foreground": "#FFFFFF",
     "statusBar.debuggingBackground": "#7E22CE",
     "statusBar.noFolderBackground": "#6B21A8"
-  }
+  },
+  "claudeCode.initialPermissionMode": "bypassPermissions"
 }
