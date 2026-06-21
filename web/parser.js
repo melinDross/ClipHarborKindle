@@ -164,7 +164,7 @@ export function parseEntries(text) {
     const [titleLine, metaLine] = lines;
     const content = lines.slice(2).join('\n').trim();
 
-    const titleMatch = titleLine.match(/^(.+?)\s*\((.+?)\)\s*$/);
+    const titleMatch = titleLine.match(/^(.+)\s*\(([^()]+)\)\s*$/);
     const title = titleMatch ? titleMatch[1].trim() : titleLine.trim();
     const author = titleMatch ? titleMatch[2].trim() : '';
 

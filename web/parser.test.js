@@ -260,6 +260,20 @@ test('parseEntries treats a title with no parenthesized author as author-less', 
   assert.equal(books[0].author, '');
 });
 
+test('parseEntries takes the last unnested parenthesized group as author when the title itself contains parentheses', () => {
+  const text = 'Parque Jurásico (Z-Library) (Michael Crichton)\n- Your Highlight on Page 1 | Loc. 1\n\nText.\n==========\n';
+  const books = parseEntries(text);
+  assert.equal(books[0].title, 'Parque Jurásico (Z-Library)');
+  assert.equal(books[0].author, 'Michael Crichton');
+});
+
+test('parseEntries still parses a simple single-parenthesis title/author correctly', () => {
+  const text = 'Some Title (Some Author)\n- Your Highlight on Page 1 | Loc. 1\n\nText.\n==========\n';
+  const books = parseEntries(text);
+  assert.equal(books[0].title, 'Some Title');
+  assert.equal(books[0].author, 'Some Author');
+});
+
 test('parseEntries returns an empty array for a file with no valid blocks', () => {
   assert.deepEqual(parseEntries(''), []);
   assert.deepEqual(parseEntries('==========\n==========\n'), []);
