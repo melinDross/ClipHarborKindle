@@ -135,3 +135,48 @@ export function parseAddedCompact(meta) {
 
   return txt;
 }
+
+/** Ports ranges_overlap() from cli/parse_kindle_notion_v1_1e.py. */
+export function rangesOverlap(aStart, aEnd, bStart, bEnd) {
+  if (aStart == null || aEnd == null || bStart == null || bEnd == null) return false;
+  return !(aEnd < bStart || bEnd < aStart);
+}
+
+/**
+ * Ports pair_notes() from cli/parse_kindle_notion_v1_1e.py. Walks entries in
+ * order; a Note is merged into the most recent Highlight whose position range
+ * overlaps it (or whose page number matches, as a fallback), otherwise it is
+ * kept as its own standalone entry.
+ */
+export function pairNotes(items) {
+  const out = [];
+  for (const it of items) {
+    if (it.kind === 'Highlight') {
+      it.noteText = '';
+      out.push(it);
+    } else if (it.kind === 'Note') {
+      let attached = false;
+      for (let j = out.length - 1; j >= 0; j--) {
+        const h = out[j];
+        if (h.kind !== 'Highlight') continue;
+        const overlap = rangesOverlap(it.posStart, it.posEnd, h.posStart, h.posEnd);
+        const samePage = it.pageNum != null && h.pageNum != null && it.pageNum === h.pageNum;
+        if (overlap || samePage) {
+          h.noteText = (h.noteText || '') + (h.noteText ? ' ' : '') + it.text.trim();
+          h.metaOverrideKind = 'Note';
+          attached = true;
+          break;
+        }
+      }
+      if (!attached) {
+        it.noteText = it.text.trim();
+        it.text = '';
+        out.push(it);
+      }
+    } else {
+      it.noteText = '';
+      out.push(it);
+    }
+  }
+  return out;
+}

@@ -110,3 +110,46 @@ test('parseAddedCompact formats a Spanish date', () => {
 test('parseAddedCompact falls back to the raw text when the date does not match either pattern', () => {
   assert.equal(parseAddedCompact('Added on some unparseable text'), 'some unparseable text');
 });
+
+import { rangesOverlap, pairNotes } from './parser.js';
+
+test('rangesOverlap returns true for overlapping ranges', () => {
+  assert.equal(rangesOverlap(10, 20, 15, 25), true);
+});
+
+test('rangesOverlap returns false for disjoint ranges', () => {
+  assert.equal(rangesOverlap(10, 20, 21, 30), false);
+});
+
+test('rangesOverlap returns false when any bound is null', () => {
+  assert.equal(rangesOverlap(10, 20, null, 30), false);
+});
+
+test('pairNotes attaches a note to the highlight whose position range overlaps it', () => {
+  const items = [
+    { kind: 'Highlight', posStart: 49, posEnd: 50, pageNum: 6, text: 'Original highlight text.' },
+    { kind: 'Note', posStart: 49, posEnd: 50, pageNum: 6, text: 'My note about it.' },
+  ];
+  const result = pairNotes(items);
+  assert.equal(result.length, 1);
+  assert.equal(result[0].noteText, 'My note about it.');
+  assert.equal(result[0].metaOverrideKind, 'Note');
+});
+
+test('pairNotes keeps a note as its own entry when no highlight overlaps', () => {
+  const items = [
+    { kind: 'Highlight', posStart: 10, posEnd: 12, pageNum: 1, text: 'Unrelated highlight.' },
+    { kind: 'Note', posStart: 90, posEnd: 91, pageNum: 9, text: 'Standalone note.' },
+  ];
+  const result = pairNotes(items);
+  assert.equal(result.length, 2);
+  assert.equal(result[1].noteText, 'Standalone note.');
+  assert.equal(result[1].text, '');
+});
+
+test('pairNotes passes bookmarks through unchanged with an empty noteText', () => {
+  const items = [{ kind: 'Bookmark', posStart: null, posEnd: null, pageNum: 5, text: '' }];
+  const result = pairNotes(items);
+  assert.equal(result.length, 1);
+  assert.equal(result[0].noteText, '');
+});
