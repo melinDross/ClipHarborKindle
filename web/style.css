@@ -20,6 +20,18 @@ body {
   gap: 4px;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kofi-badge {
+  height: 28px;
+  width: auto;
+  display: block;
+}
+
 .lang-button {
   padding: 4px 8px;
   font-size: 0.85rem;
