@@ -16,7 +16,7 @@ El `<header class="nav">` pasa de tener dos hijos directos (el `<span>` del tít
   <div class="header-actions">
     <!-- TODO: sustituir TU_USUARIO_AQUI por el usuario real de Ko-fi cuando exista la cuenta -->
     <a id="kofi-link" class="kofi-link" href="https://ko-fi.com/TU_USUARIO_AQUI" target="_blank" rel="noopener noreferrer">
-      <img src="vendor/kofi-badge.png" alt="Support me on Ko-fi" class="kofi-badge">
+      <img src="vendor/kofi-badge.svg" alt="Buy Me a Coffee at ko-fi.com" class="kofi-badge">
     </a>
     <div class="lang-switch">
       <button id="lang-es" class="lang-button" type="button">🇪🇸 ES</button>
@@ -30,11 +30,11 @@ Nada cambia en `web/app.js` — no hay lógica asociada a este botón, es un enl
 
 ## Imagen vendorizada
 
-Siguiendo el mismo criterio que con JSZip (`web/vendor/jszip.min.js`, vendorizado en vez de cargado desde CDN), el badge oficial de Ko-fi se descarga una vez y se guarda en `web/vendor/kofi-badge.png`. El header no debe depender de que `storage.ko-fi.com` esté disponible para renderizar correctamente.
+Siguiendo el mismo criterio que con JSZip (`web/vendor/jszip.min.js`, vendorizado en vez de cargado desde CDN), el badge oficial de Ko-fi se descarga una vez y se guarda en `web/vendor/kofi-badge.svg` (el badge pequeño oficial que el propio Ko-fi documenta para insertar en GitHub, servido en `https://ko-fi.com/img/githubbutton_sm.svg`). El header no debe depender de que los servidores de Ko-fi estén disponibles para renderizar correctamente.
 
 ## Accesibilidad e internacionalización
 
-- `alt="Support me on Ko-fi"` queda **fijo en inglés**, sin pasar por `web/strings.js` — el badge visual de Ko-fi ya trae texto en inglés incrustado en la imagen, así que traducir solo el `alt` generaría inconsistencia entre lo que se lee y lo que se ve.
+- `alt="Buy Me a Coffee at ko-fi.com"` queda **fijo en inglés**, sin pasar por `web/strings.js` — es el texto real que trae incrustado el SVG vendorizado, así que traducir solo el `alt` generaría inconsistencia entre lo que se lee y lo que se ve. (Nota: durante la implementación se sustituyó el texto genérico "Support me on Ko-fi" de este borrador inicial por el texto real del asset, ver `docs/superpowers/plans/2026-06-23-kofi-donation-button.md`.)
 - `target="_blank" rel="noopener noreferrer"` por buena práctica de seguridad al abrir un enlace externo en pestaña nueva (evita que la página de destino pueda acceder a `window.opener`).
 
 ## Cambios en `web/style.css`
