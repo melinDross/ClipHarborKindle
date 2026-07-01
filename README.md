@@ -5,7 +5,7 @@
 
 ## Qué es este proyecto
 
-Notion Scribe es una herramienta que convierte automáticamente los subrayados y notas que hago en mi Kindle en archivos Markdown listos para importar a Notion. Nació como un script de línea de comandos en Python; hoy la versión activamente mantenida es una **web sin instalación**, pensada para cualquier persona, sin necesidad de tocar una terminal: **[melindross.github.io/Kindle-Enhanced-Clippings-Exporter](https://melindross.github.io/Kindle-Enhanced-Clippings-Exporter/)**. Arrastra tu `My Clippings.txt` y descarga el `.zip` (o cada `.md` por separado) — todo se procesa en tu navegador, el fichero nunca se envía a ningún servidor.
+Notion Scribe es una herramienta que convierte automáticamente los subrayados y notas que hago en mi Kindle en archivos Markdown listos para importar a Notion. Nació como un script de línea de comandos en Python; hoy la versión activamente mantenida es una **web sin instalación**, pensada para cualquier persona, sin necesidad de tocar una terminal: **[melindross.github.io/ClipHarborKindle](https://melindross.github.io/ClipHarborKindle/)**. Arrastra tu `My Clippings.txt` y descarga el `.zip` (o cada `.md` por separado) — todo se procesa en tu navegador, el fichero nunca se envía a ningún servidor.
 
 El script de Python original sigue en el repo y sigue funcionando para quien prefiera CLI, pero quedó **congelado** a partir de 2026-06-21: la lógica de parsing ya no se itera ahí, sino en la versión web (ver "Fase 5 — Migración a web" más abajo, en la sección "Cómo lo construí", para el por qué).
 
@@ -243,7 +243,7 @@ El criterio de fondo no cambió: **automatizar cuando el coste de no hacerlo sup
 ## Estructura del repositorio
 
 ```
-Kindle-Enhanced-Clippings-Exporter/
+ClipHarborKindle/
 ├── cli/
 │   ├── parse_kindle_notion_v1_1e.py       # Script principal (congelado, ver Fase 5)
 │   └── parse_kindle_notion_v1_2_1_fix.py  # Experimento cancelado (v1.2)
@@ -299,4 +299,4 @@ Reintroducir la deduplicación de v1.2 hasta tener una estrategia de comparació
 
 ## Repositorio
 
-[github.com/melinDross/Kindle-Enhanced-Clippings-Exporter](https://github.com/melinDross/Kindle-Enhanced-Clippings-Exporter)
+[github.com/melinDross/ClipHarborKindle](https://github.com/melinDross/ClipHarborKindle)
