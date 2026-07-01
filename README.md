@@ -1,11 +1,11 @@
-# Notion Scribe — Kindle Clippings Exporter
+# Clip Harbor for Kindle
 ### Proyecto de automatización y parsing | Python · CLI · JavaScript · Web · Markdown · Notion
 
 ---
 
 ## Qué es este proyecto
 
-Notion Scribe es una herramienta que convierte automáticamente los subrayados y notas que hago en mi Kindle en archivos Markdown listos para importar a Notion. Nació como un script de línea de comandos en Python; hoy la versión activamente mantenida es una **web sin instalación**, pensada para cualquier persona, sin necesidad de tocar una terminal: **[melindross.github.io/ClipHarborKindle](https://melindross.github.io/ClipHarborKindle/)**. Arrastra tu `My Clippings.txt` y descarga el `.zip` (o cada `.md` por separado) — todo se procesa en tu navegador, el fichero nunca se envía a ningún servidor.
+Clip Harbor for Kindle es una herramienta que convierte automáticamente los subrayados y notas que hago en mi Kindle en archivos Markdown listos para importar a Notion. Nació como un script de línea de comandos en Python; hoy la versión activamente mantenida es una **web sin instalación**, pensada para cualquier persona, sin necesidad de tocar una terminal: **[melindross.github.io/ClipHarborKindle](https://melindross.github.io/ClipHarborKindle/)**. Arrastra tu `My Clippings.txt` y descarga el `.zip` (o cada `.md` por separado) — todo se procesa en tu navegador, el fichero nunca se envía a ningún servidor.
 
 El script de Python original sigue en el repo y sigue funcionando para quien prefiera CLI, pero quedó **congelado** a partir de 2026-06-21: la lógica de parsing ya no se itera ahí, sino en la versión web (ver "Fase 5 — Migración a web" más abajo, en la sección "Cómo lo construí", para el por qué).
 
