@@ -15,6 +15,28 @@ const langEnButton = document.getElementById('lang-en');
 let currentBooks = [];
 let currentLang = detectInitialLang();
 let lastErrorKey = null;
+let jsZipPromise = null;
+
+// JSZip is only needed for the "download all" button, not for the initial
+// parse or for downloading a single book — so it's fetched on first use
+// instead of blocking page load. It's a plain UMD script (not an ES module),
+// so it's loaded by appending a <script> tag rather than dynamic import().
+// The integrity hash pins it against tampering; browsers verify it even for
+// same-origin scripts.
+function loadJSZip() {
+  if (window.JSZip) return Promise.resolve(window.JSZip);
+  if (!jsZipPromise) {
+    jsZipPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'vendor/jszip.min.js';
+      script.integrity = 'sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG';
+      script.onload = () => resolve(window.JSZip);
+      script.onerror = () => reject(new Error('Failed to load JSZip'));
+      document.head.appendChild(script);
+    });
+  }
+  return jsZipPromise;
+}
 
 function t(key) {
   return STRINGS[currentLang][key];
@@ -190,6 +212,7 @@ downloadButton.addEventListener('click', async () => {
   downloadButton.textContent = t('generatingLabel');
 
   try {
+    const JSZip = await loadJSZip();
     const zip = new JSZip();
     for (const book of currentBooks) {
       zip.file(book.filename, book.markdown);

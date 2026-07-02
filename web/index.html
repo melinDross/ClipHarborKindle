@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Clip Harbor for Kindle</title>
   <link rel="stylesheet" href="style.css">
   <script src="lang-init.js"></script>
 </head>
 <body>
   <header class="nav">
-    <span>📚 Clip Harbor for Kindle</span>
+    <h1>📚 Clip Harbor for Kindle</h1>
     <div class="header-actions">
       <a id="kofi-link" class="kofi-link" href="https://ko-fi.com/melindross" target="_blank" rel="noopener noreferrer me" title="Official donation link for this project">
         <img src="vendor/kofi-badge.svg" alt="Buy Me a Coffee at ko-fi.com" class="kofi-badge">
@@ -38,7 +39,6 @@
     </section>
   </main>
 
-  <script src="vendor/jszip.min.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>

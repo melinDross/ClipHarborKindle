@@ -85,6 +85,20 @@ El CLI copia el `My Clippings.txt` original a `backups/` con timestamp antes de 
 
 - **README.md (2026-06-21):** reescrito para reflejar que `web/parser.js` es ahora la fuente de verdad y `cli/parse_kindle_notion_v1_1e.py` está congelado. Se mantuvo el formato narrativo de portfolio QA (origen, fases, decisiones, testing, historial de versiones) y se añadió una "Fase 5 — Migración a web" explicando el por qué de la migración y de la gobernanza de parsing. También se documentó ahí el cambio de criterio sobre tests automatizados (el CLI no los tiene por decisión consciente; la web sí, y se explica por qué cambió el contexto).
 
+## Ronda 2026-07-03: auditoría exhaustiva + quick wins de seguridad/accesibilidad/SEO (solo `web/`)
+
+Auditoría multi-disciplinar (seguridad, accesibilidad WCAG 2.2 AA, SEO/GEO, rendimiento, visual/mobile) guardada en `docs/audit-clipharbor4kindle-2026-07-03@00:35.md`. De los 10 hallazgos, se implementaron los quick wins #3-7, #9 y #10 (todos solo en `web/`):
+
+- **CSP:** añadido `frame-ancestors 'none'` a la política ya existente en `web/index.html` (mitiga clickjacking; `X-Frame-Options` no es viable como header real en GitHub Pages sin tooling adicional).
+- **`<h1>`:** el `<span>` de marca en el header pasó a `<h1>` — antes el único heading de la página era el `<h2>` de `#book-count`, rompiendo la jerarquía de encabezados.
+- **Touch targets:** `.lang-button` y `.download-one-button` ahora cumplen el mínimo de 44×44px (WCAG 2.5.5/2.5.8) — antes tenían `padding: 4px 8px/10px`, insuficiente para uso táctil.
+- **SRI en JSZip:** `web/vendor/jszip.min.js` pasó a cargarse con hash `integrity` (sha384) pinneado, como defensa en profundidad ante manipulación del fichero vendorizado.
+- **Lazy-load de JSZip:** se quitó el `<script src="vendor/jszip.min.js">` estático de `index.html`; ahora `app.js` lo inyecta bajo demanda (`loadJSZip()`) solo al pulsar "descargar todo (.zip)" — la descarga individual por libro (`downloadSingleBook`) nunca lo necesitó, así que antes se pagaba ese coste de parseo en toda visita sin motivo.
+- **Referrer-Policy:** añadido `<meta name="referrer" content="strict-origin-when-cross-origin">`.
+- **Header responsive:** `.nav`/`.header-actions` pasaron a `flex-wrap: wrap` con `row-gap`, para que en viewports <360px el badge de Ko-fi y los botones de idioma no se compriman/corten en una sola fila sin wrap.
+
+**Pendiente de la auditoría (no implementado en esta ronda):** meta description/Open Graph/canonical, `robots.txt`/`sitemap.xml`, structured data (Schema.org `SoftwareApplication`), `aria-live` cubriendo el `<ul>` de libros completo, y favicon — ver el informe completo para el detalle de cada uno.
+
 ## Mejoras pendientes (por prioridad)
 
 1. ~~Arreglar regex `DASH`~~ — hecho

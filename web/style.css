@@ -11,8 +11,16 @@ body {
   font-weight: 600;
   margin-bottom: 24px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  row-gap: 12px;
+}
+
+.nav h1 {
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
 }
 
 .lang-switch {
@@ -22,6 +30,7 @@ body {
 
 .header-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
 }
@@ -33,7 +42,9 @@ body {
 }
 
 .lang-button {
-  padding: 4px 8px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px 14px;
   font-size: 0.85rem;
   font-weight: 400;
   border: 1px solid #ccc;
@@ -100,7 +111,8 @@ body {
 
 .download-one-button {
   flex-shrink: 0;
-  padding: 4px 10px;
+  min-height: 44px;
+  padding: 10px 14px;
   font-size: 0.85rem;
   cursor: pointer;
 }
