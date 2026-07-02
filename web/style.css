@@ -129,6 +129,19 @@ body {
   opacity: 0.5;
 }
 
+.site-footer {
+  margin-top: 48px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.site-footer a {
+  color: inherit;
+}
+
 @media (prefers-color-scheme: dark) {
   body {
     background: #16181c;
@@ -163,6 +176,11 @@ body {
   .processing {
     background: #1c2b45;
     color: #9dc2ff;
+  }
+
+  .site-footer {
+    border-top-color: #333;
+    color: #777;
   }
 
   #book-list li {
