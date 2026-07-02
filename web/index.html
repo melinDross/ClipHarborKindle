@@ -6,16 +6,32 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Clip Harbor for Kindle</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="style.css">
   <script src="lang-init.js"></script>
+  <script src="theme-init.js"></script>
 </head>
 <body>
   <header class="nav">
-    <h1>📚 Clip Harbor for Kindle</h1>
+    <h1>
+      <svg class="brand-mark" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="chk-logo-title">
+        <title id="chk-logo-title">Clip Harbor for Kindle</title>
+        <path d="M32 9 L38 17 L26 17 Z" fill="currentColor"/>
+        <rect x="27.5" y="17" width="9" height="5" fill="currentColor"/>
+        <path d="M26 22 L38 22 L41 46 L23 46 Z" fill="currentColor"/>
+        <rect x="20" y="46" width="24" height="6" fill="currentColor"/>
+        <path d="M38 19 C 44 19, 50 19, 58 18" stroke="#e3a72e" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.95"/>
+        <path d="M38 23 C 44 23.5, 49 24, 55 25" stroke="#e3a72e" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.7"/>
+        <path d="M38 27 C 43 28, 47 29.5, 52 31.5" stroke="#e3a72e" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.45"/>
+        <path d="M16 55 Q 24 51, 32 55 T 48 55" stroke="#2f6f6b" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      </svg>
+      Clip Harbor for Kindle
+    </h1>
     <div class="header-actions">
       <a id="kofi-link" class="kofi-link" href="https://ko-fi.com/melindross" target="_blank" rel="noopener noreferrer me" title="Official donation link for this project">
         <img src="vendor/kofi-badge.svg" alt="Buy Me a Coffee at ko-fi.com" class="kofi-badge">
       </a>
+      <button id="theme-toggle" class="theme-button" type="button" aria-pressed="false">🌙</button>
       <div class="lang-switch">
         <button id="lang-es" class="lang-button" type="button">🇪🇸 ES</button>
         <button id="lang-en" class="lang-button" type="button">🇬🇧 EN</button>

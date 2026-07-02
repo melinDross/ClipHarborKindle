@@ -1,9 +1,33 @@
+:root {
+  --bg: #ffffff;
+  --fg: #222222;
+  --brand: #14213d;
+  --border-muted: #eeeeee;
+  --lang-btn-bg: #ffffff;
+  --lang-btn-border: #cccccc;
+  --lang-btn-active-bg: #eeeeff;
+  --lang-btn-active-border: #8888aa;
+  --drop-border: #888888;
+  --drop-dragover-border: #44aa44;
+  --drop-dragover-bg: #f3fff3;
+  --error-bg: #fde8e8;
+  --error-fg: #8a1f1f;
+  --processing-bg: #eef4fd;
+  --processing-fg: #1f4a8a;
+  --footer-border: #eeeeee;
+  --footer-fg: #888888;
+  --action-btn-bg: #ffffff;
+  --action-btn-fg: #222222;
+  --action-btn-border: #cccccc;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   max-width: 640px;
   margin: 0 auto;
   padding: 24px;
-  color: #222;
+  background: var(--bg);
+  color: var(--fg);
 }
 
 .nav {
@@ -21,6 +45,16 @@ body {
   font-size: inherit;
   font-weight: inherit;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-mark {
+  width: 1.3em;
+  height: 1.3em;
+  flex-shrink: 0;
+  color: var(--brand);
 }
 
 .lang-switch {
@@ -41,50 +75,52 @@ body {
   display: block;
 }
 
-.lang-button {
+.lang-button,
+.theme-button {
   min-width: 44px;
   min-height: 44px;
   padding: 10px 14px;
   font-size: 0.85rem;
   font-weight: 400;
-  border: 1px solid #ccc;
+  border: 1px solid var(--lang-btn-border);
   border-radius: 4px;
-  background: #fff;
+  background: var(--lang-btn-bg);
+  color: var(--action-btn-fg);
   cursor: pointer;
 }
 
 .lang-button.active {
-  background: #eef;
-  border-color: #88a;
+  background: var(--lang-btn-active-bg);
+  border-color: var(--lang-btn-active-border);
   font-weight: 600;
 }
 
 .drop-zone {
   padding: 32px;
   text-align: center;
-  border: 2px dashed #888;
+  border: 2px dashed var(--drop-border);
   border-radius: 8px;
   cursor: pointer;
   margin-bottom: 16px;
 }
 
 .drop-zone.dragover {
-  border-color: #4a4;
-  background: #f3fff3;
+  border-color: var(--drop-dragover-border);
+  background: var(--drop-dragover-bg);
 }
 
 .error {
   padding: 12px;
   border-radius: 6px;
-  background: #fde8e8;
-  color: #8a1f1f;
+  background: var(--error-bg);
+  color: var(--error-fg);
 }
 
 .processing {
   padding: 12px;
   border-radius: 6px;
-  background: #eef4fd;
-  color: #1f4a8a;
+  background: var(--processing-bg);
+  color: var(--processing-fg);
 }
 
 :focus-visible {
@@ -99,7 +135,7 @@ body {
 
 #book-list li {
   padding: 8px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-muted);
 }
 
 .book-row {
@@ -129,13 +165,20 @@ body {
   opacity: 0.5;
 }
 
+.download-one-button,
+#download-button {
+  background: var(--action-btn-bg);
+  color: var(--action-btn-fg);
+  border: 1px solid var(--action-btn-border);
+}
+
 .site-footer {
   margin-top: 48px;
   padding-top: 16px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--footer-border);
   text-align: center;
   font-size: 0.8rem;
-  color: #888;
+  color: var(--footer-fg);
 }
 
 .site-footer a {
@@ -143,54 +186,77 @@ body {
 }
 
 @media (prefers-color-scheme: dark) {
-  body {
-    background: #16181c;
-    color: #e6e6e6;
+  :root {
+    --bg: #16181c;
+    --fg: #e6e6e6;
+    --brand: #e6e6e6;
+    --border-muted: #333333;
+    --lang-btn-bg: #24272c;
+    --lang-btn-border: #444444;
+    --lang-btn-active-bg: #2a2f45;
+    --lang-btn-active-border: #6a7bd8;
+    --drop-border: #666666;
+    --drop-dragover-border: #44aa44;
+    --drop-dragover-bg: #10200f;
+    --error-bg: #3a1f1f;
+    --error-fg: #ff9d9d;
+    --processing-bg: #1c2b45;
+    --processing-fg: #9dc2ff;
+    --footer-border: #333333;
+    --footer-fg: #777777;
+    --action-btn-bg: #24272c;
+    --action-btn-fg: #e6e6e6;
+    --action-btn-border: #444444;
   }
+}
 
-  .lang-button {
-    background: #24272c;
-    border-color: #444;
-    color: #e6e6e6;
-  }
+/*
+ * Explicit overrides from the theme toggle, applied regardless of OS
+ * preference. Written after the prefers-color-scheme block so they win
+ * the cascade at equal specificity (:root vs :root — source order decides).
+ */
+:root.theme-light {
+  --bg: #ffffff;
+  --fg: #222222;
+  --brand: #14213d;
+  --border-muted: #eeeeee;
+  --lang-btn-bg: #ffffff;
+  --lang-btn-border: #cccccc;
+  --lang-btn-active-bg: #eeeeff;
+  --lang-btn-active-border: #8888aa;
+  --drop-border: #888888;
+  --drop-dragover-border: #44aa44;
+  --drop-dragover-bg: #f3fff3;
+  --error-bg: #fde8e8;
+  --error-fg: #8a1f1f;
+  --processing-bg: #eef4fd;
+  --processing-fg: #1f4a8a;
+  --footer-border: #eeeeee;
+  --footer-fg: #888888;
+  --action-btn-bg: #ffffff;
+  --action-btn-fg: #222222;
+  --action-btn-border: #cccccc;
+}
 
-  .lang-button.active {
-    background: #2a2f45;
-    border-color: #6a7bd8;
-  }
-
-  .drop-zone {
-    border-color: #666;
-  }
-
-  .drop-zone.dragover {
-    border-color: #4a4;
-    background: #10200f;
-  }
-
-  .error {
-    background: #3a1f1f;
-    color: #ff9d9d;
-  }
-
-  .processing {
-    background: #1c2b45;
-    color: #9dc2ff;
-  }
-
-  .site-footer {
-    border-top-color: #333;
-    color: #777;
-  }
-
-  #book-list li {
-    border-bottom-color: #333;
-  }
-
-  .download-one-button,
-  #download-button {
-    background: #24272c;
-    color: #e6e6e6;
-    border: 1px solid #444;
-  }
+:root.theme-dark {
+  --bg: #16181c;
+  --fg: #e6e6e6;
+  --brand: #e6e6e6;
+  --border-muted: #333333;
+  --lang-btn-bg: #24272c;
+  --lang-btn-border: #444444;
+  --lang-btn-active-bg: #2a2f45;
+  --lang-btn-active-border: #6a7bd8;
+  --drop-border: #666666;
+  --drop-dragover-border: #44aa44;
+  --drop-dragover-bg: #10200f;
+  --error-bg: #3a1f1f;
+  --error-fg: #ff9d9d;
+  --processing-bg: #1c2b45;
+  --processing-fg: #9dc2ff;
+  --footer-border: #333333;
+  --footer-fg: #777777;
+  --action-btn-bg: #24272c;
+  --action-btn-fg: #e6e6e6;
+  --action-btn-border: #444444;
 }

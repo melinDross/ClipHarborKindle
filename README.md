@@ -1,5 +1,7 @@
 **EN** | [ES](README.es.md)
 
+<img src="docs/logo.svg" width="72" height="72" alt="Clip Harbor for Kindle logo — a lighthouse casting a highlighter beam">
+
 # Clip Harbor for Kindle — Kindle Highlights → Notion Markdown Exporter
 ### QA / automation project | Python · JavaScript · Web · Markdown · Notion
 

@@ -21,6 +21,8 @@ export const STRINGS = {
     langWarning: '⚠️ Idioma no reconocido — revisa el resultado',
     downloadOneLabel: '⬇️ Descargar',
     dropZoneAriaLabel: 'Subir fichero My Clippings.txt',
+    switchToDarkAriaLabel: 'Cambiar a modo oscuro',
+    switchToLightAriaLabel: 'Cambiar a modo claro',
   },
   en: {
     dropZone: '⬆️ Drag your "My Clippings.txt" here<br>or click to browse',
@@ -37,6 +39,8 @@ export const STRINGS = {
     langWarning: '⚠️ Unrecognized language — please check the result',
     downloadOneLabel: '⬇️ Download',
     dropZoneAriaLabel: 'Upload My Clippings.txt file',
+    switchToDarkAriaLabel: 'Switch to dark mode',
+    switchToLightAriaLabel: 'Switch to light mode',
   },
 };
 

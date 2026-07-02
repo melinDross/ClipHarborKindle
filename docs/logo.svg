@@ -1,0 +1,11 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="chk-logo-title">
+  <title id="chk-logo-title">Clip Harbor for Kindle</title>
+  <path d="M32 9 L38 17 L26 17 Z" fill="#14213d"/>
+  <rect x="27.5" y="17" width="9" height="5" fill="#14213d"/>
+  <path d="M26 22 L38 22 L41 46 L23 46 Z" fill="#14213d"/>
+  <rect x="20" y="46" width="24" height="6" fill="#14213d"/>
+  <path d="M38 19 C 44 19, 50 19, 58 18" stroke="#e3a72e" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.95"/>
+  <path d="M38 23 C 44 23.5, 49 24, 55 25" stroke="#e3a72e" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.7"/>
+  <path d="M38 27 C 43 28, 47 29.5, 52 31.5" stroke="#e3a72e" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.45"/>
+  <path d="M16 55 Q 24 51, 32 55 T 48 55" stroke="#2f6f6b" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+</svg>

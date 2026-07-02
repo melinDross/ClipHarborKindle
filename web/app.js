@@ -11,11 +11,45 @@ const bookList = document.getElementById('book-list');
 const downloadButton = document.getElementById('download-button');
 const langEsButton = document.getElementById('lang-es');
 const langEnButton = document.getElementById('lang-en');
+const themeToggleButton = document.getElementById('theme-toggle');
 
 let currentBooks = [];
 let currentLang = detectInitialLang();
 let lastErrorKey = null;
 let jsZipPromise = null;
+
+// Only reflects the button's icon/label; the actual page appearance is
+// driven by the theme-* class theme-init.js applies pre-paint (or, absent a
+// saved choice, by the prefers-color-scheme rules in style.css). Doesn't get
+// written to localStorage until the user actually clicks the toggle — so
+// visitors who never touch it keep following their OS setting live.
+let currentTheme = detectInitialTheme();
+
+function detectInitialTheme() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light' || saved === 'dark') return saved;
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+// The icon and aria-pressed reflect the current appearance; the label
+// describes what clicking it does next (switch to the *other* mode), which
+// reads more naturally for a toggle than a static "dark mode" label would.
+function updateThemeButton() {
+  themeToggleButton.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+  themeToggleButton.setAttribute('aria-pressed', String(currentTheme === 'dark'));
+  themeToggleButton.setAttribute(
+    'aria-label',
+    t(currentTheme === 'dark' ? 'switchToLightAriaLabel' : 'switchToDarkAriaLabel')
+  );
+}
+
+function setTheme(theme) {
+  currentTheme = theme;
+  localStorage.setItem('theme', theme);
+  document.documentElement.classList.toggle('theme-light', theme === 'light');
+  document.documentElement.classList.toggle('theme-dark', theme === 'dark');
+  updateThemeButton();
+}
 
 // JSZip is only needed for the "download all" button, not for the initial
 // parse or for downloading a single book — so it's fetched on first use
@@ -125,6 +159,7 @@ function applyLang(lang) {
   langEnButton.classList.toggle('active', lang === 'en');
   langEsButton.setAttribute('aria-pressed', String(lang === 'es'));
   langEnButton.setAttribute('aria-pressed', String(lang === 'en'));
+  updateThemeButton();
 
   if (!errorMessage.hidden && lastErrorKey) {
     errorMessage.textContent = t(lastErrorKey);
@@ -198,6 +233,8 @@ fileInput.addEventListener('change', () => {
 
 langEsButton.addEventListener('click', () => applyLang('es'));
 langEnButton.addEventListener('click', () => applyLang('en'));
+
+themeToggleButton.addEventListener('click', () => setTheme(currentTheme === 'dark' ? 'light' : 'dark'));
 
 function buildZipFilename() {
   const now = new Date();

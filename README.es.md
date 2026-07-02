@@ -1,5 +1,7 @@
 [EN](README.md) | **ES**
 
+<img src="docs/logo.svg" width="72" height="72" alt="Logo de Clip Harbor for Kindle — un faro proyectando un haz en forma de subrayado">
+
 # Clip Harbor for Kindle — Exportador de subrayados de Kindle a Markdown para Notion
 ### Proyecto de QA / automatización | Python · JavaScript · Web · Markdown · Notion
 
