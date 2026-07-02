@@ -4,6 +4,7 @@ import { STRINGS, detectInitialLang } from './strings.js';
 const dropZone = document.getElementById('drop-zone');
 const fileInput = document.getElementById('file-input');
 const errorMessage = document.getElementById('error-message');
+const processingMessage = document.getElementById('processing-message');
 const results = document.getElementById('results');
 const bookCount = document.getElementById('book-count');
 const bookList = document.getElementById('book-list');
@@ -24,6 +25,19 @@ function showError(key) {
   errorMessage.textContent = t(key);
   errorMessage.hidden = false;
   results.hidden = true;
+}
+
+// Builds the drop-zone copy from text nodes instead of innerHTML, so a
+// future string that embeds user/file-derived data can't turn into an XSS
+// sink. The only "markup" the copy needs is a line break between the two
+// sentences, which we insert as a real <br> element instead of parsing HTML.
+function setDropZoneText(copy) {
+  dropZone.textContent = '';
+  const lines = copy.split('<br>');
+  lines.forEach((line, index) => {
+    if (index > 0) dropZone.appendChild(document.createElement('br'));
+    dropZone.appendChild(document.createTextNode(line));
+  });
 }
 
 function renderBooks(books) {
@@ -82,7 +96,7 @@ function applyLang(lang) {
   localStorage.setItem('uiLang', lang);
   document.documentElement.lang = lang;
 
-  dropZone.innerHTML = t('dropZone');
+  setDropZoneText(t('dropZone'));
   dropZone.setAttribute('aria-label', t('dropZoneAriaLabel'));
   if (!downloadButton.disabled) downloadButton.textContent = t('downloadLabel');
   langEsButton.classList.toggle('active', lang === 'es');
@@ -93,22 +107,40 @@ function applyLang(lang) {
   if (!errorMessage.hidden && lastErrorKey) {
     errorMessage.textContent = t(lastErrorKey);
   }
+  if (!processingMessage.hidden) {
+    processingMessage.textContent = t('processingLabel');
+  }
   if (!results.hidden && currentBooks.length > 0) {
     renderBooks(currentBooks);
   }
 }
 
 function handleFile(file) {
+  processingMessage.textContent = t('processingLabel');
+  processingMessage.hidden = false;
+  errorMessage.hidden = true;
+  results.hidden = true;
+
   const reader = new FileReader();
   reader.onload = () => {
-    try {
-      const books = exportBooks(reader.result, file.name);
-      renderBooks(books);
-    } catch (err) {
-      showError('processError');
-    }
+    // Deferred one tick so the browser has a chance to paint the
+    // "processing" message before the (potentially slow, synchronous)
+    // parse of a large My Clippings.txt blocks the main thread.
+    setTimeout(() => {
+      try {
+        const books = exportBooks(reader.result, file.name);
+        renderBooks(books);
+      } catch (err) {
+        showError('processError');
+      } finally {
+        processingMessage.hidden = true;
+      }
+    }, 0);
   };
-  reader.onerror = () => showError('readError');
+  reader.onerror = () => {
+    processingMessage.hidden = true;
+    showError('readError');
+  };
   reader.readAsText(file, 'utf-8');
 }
 
