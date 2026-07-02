@@ -8,7 +8,7 @@
 [![Last commit](https://img.shields.io/github/last-commit/melinDross/ClipHarborKindle)](https://github.com/melinDross/ClipHarborKindle/commits/main)
 [![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue)](LICENSE)
 
-![Real output — a Kindle book imported into Notion](docs/screenshots/notion-import-result.png)
+![The live app — drag in My Clippings.txt, get one Markdown file per book back](docs/screenshots/app-results-light.png)
 
 Clip Harbor for Kindle automatically converts the highlights and notes you make on a Kindle into Markdown files ready to import into Notion. It started as a Python command-line script; today the actively maintained version is an **install-free web app**, built for anyone — no terminal required: **[melindross.github.io/ClipHarborKindle](https://melindross.github.io/ClipHarborKindle/)**. Drag in your `My Clippings.txt` and download the `.zip` (or each `.md` individually) — everything runs in your browser, the file is never sent to any server.
 
@@ -163,11 +163,15 @@ A full multi-discipline audit (security, WCAG 2.2 AA accessibility, SEO/GEO, per
 
 ## 📸 Screenshots
 
+| Landing (light) | Landing (dark mode) |
+|---|---|
+| ![Landing screen, light mode](docs/screenshots/app-landing-light.png) | ![Landing screen, dark mode, following prefers-color-scheme](docs/screenshots/app-landing-dark.png) |
+
 | clippings.io comparison | Real Notion import result |
 |---|---|
 | ![clippings.io test — flat output with no structure](docs/screenshots/clippings-io-comparison.png) | ![Notion import — How to Win Friends and Influence People](docs/screenshots/notion-import-result.png) |
 
-The import result above ("Cómo ganar amigos e influir sobre las personas" / *How to Win Friends and Influence People*) is a real generation, not a mockup.
+All four screenshots above are the real, live app and a real generation — none are mockups. The landing shots are from [melindross.github.io/ClipHarborKindle](https://melindross.github.io/ClipHarborKindle/); the Notion import result ("Cómo ganar amigos e influir sobre las personas" / *How to Win Friends and Influence People*) is a real book processed through the tool.
 
 ---
 

@@ -8,7 +8,7 @@
 [![Last commit](https://img.shields.io/github/last-commit/melinDross/ClipHarborKindle)](https://github.com/melinDross/ClipHarborKindle/commits/main)
 [![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue)](LICENSE)
 
-![Resultado real — un libro de Kindle importado en Notion](docs/screenshots/notion-import-result.png)
+![La app en vivo — arrastras My Clippings.txt, recibes un Markdown por libro](docs/screenshots/app-results-light.png)
 
 Clip Harbor for Kindle convierte automáticamente los subrayados y notas que haces en un Kindle en archivos Markdown listos para importar a Notion. Nació como un script de línea de comandos en Python; hoy la versión activamente mantenida es una **web sin instalación**, pensada para cualquier persona, sin necesidad de tocar una terminal: **[melindross.github.io/ClipHarborKindle](https://melindross.github.io/ClipHarborKindle/)**. Arrastra tu `My Clippings.txt` y descarga el `.zip` (o cada `.md` por separado) — todo se procesa en tu navegador, el fichero nunca se envía a ningún servidor.
 
@@ -163,11 +163,15 @@ Una auditoría multidisciplinar completa (seguridad, accesibilidad WCAG 2.2 AA, 
 
 ## 📸 Capturas
 
+| Landing (modo claro) | Landing (modo oscuro) |
+|---|---|
+| ![Pantalla de inicio, modo claro](docs/screenshots/app-landing-light.png) | ![Pantalla de inicio, modo oscuro, según prefers-color-scheme](docs/screenshots/app-landing-dark.png) |
+
 | Comparativa con clippings.io | Resultado real importado en Notion |
 |---|---|
 | ![Test con clippings.io — resultado plano sin estructura](docs/screenshots/clippings-io-comparison.png) | ![Output en Notion — Cómo ganar amigos e influir sobre las personas](docs/screenshots/notion-import-result.png) |
 
-El resultado de arriba ("Cómo ganar amigos e influir sobre las personas") es una generación real, no un mockup.
+Las cuatro capturas de arriba son de la app real en vivo y una generación real — ninguna es un mockup. Las de landing son de [melindross.github.io/ClipHarborKindle](https://melindross.github.io/ClipHarborKindle/); el resultado importado en Notion ("Cómo ganar amigos e influir sobre las personas") es un libro real procesado con la herramienta.
 
 ---
 
