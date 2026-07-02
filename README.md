@@ -280,7 +280,8 @@ The CLI runs from the repo root (e.g. `python3 cli/parse_kindle_notion_v1_1e.py`
 | v1.2 (CLI) | Cancelled | Highlight deduplication — unacceptable false negatives, risk of silently losing annotations |
 | Web — MVP | Stable | Same parsing engine ported to JS, runs 100% in browser, `.zip` download, ES/EN interface switcher |
 | Web — fixes + per-book download + a11y | Stable | Filename-collision fix, nested-parentheses title/author regex fix, unrecognized-language warning, per-book download, baseline accessibility, first automated test suite |
-| v1.4 — Security/a11y/performance hardening | **Current** | `frame-ancestors` CSP, real `<h1>`, 44px touch targets, SRI-pinned + lazy-loaded JSZip, `Referrer-Policy`, responsive header |
+| v1.4 — Security/a11y/performance hardening | Stable | `frame-ancestors` CSP, real `<h1>`, 44px touch targets, SRI-pinned + lazy-loaded JSZip, `Referrer-Policy`, responsive header |
+| v1.5 — Brand identity + manual theme toggle | **Current** | Logo/favicon ("Beacon Mark"), manual light/dark toggle with pre-paint persistence, `style.css` refactored to CSS custom properties, README rewrite + `LICENSE`, real app screenshots |
 
 Full detail per release: [GitHub Releases](https://github.com/melinDross/ClipHarborKindle/releases).
 

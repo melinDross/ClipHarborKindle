@@ -97,7 +97,21 @@ Auditoría multi-disciplinar (seguridad, accesibilidad WCAG 2.2 AA, SEO/GEO, ren
 - **Referrer-Policy:** añadido `<meta name="referrer" content="strict-origin-when-cross-origin">`.
 - **Header responsive:** `.nav`/`.header-actions` pasaron a `flex-wrap: wrap` con `row-gap`, para que en viewports <360px el badge de Ko-fi y los botones de idioma no se compriman/corten en una sola fila sin wrap.
 
-**Pendiente de la auditoría (no implementado en esta ronda):** meta description/Open Graph/canonical, `robots.txt`/`sitemap.xml`, structured data (Schema.org `SoftwareApplication`), `aria-live` cubriendo el `<ul>` de libros completo, y favicon — ver el informe completo para el detalle de cada uno.
+**Pendiente de la auditoría (no implementado en esta ronda):** meta description/Open Graph/canonical, `robots.txt`/`sitemap.xml`, structured data (Schema.org `SoftwareApplication`), `aria-live` cubriendo el `<ul>` de libros completo — ver el informe completo para el detalle de cada uno. El favicon (pendiente en esta lista original) se resolvió más tarde el mismo día, ver ronda siguiente.
+
+## Ronda 2026-07-03 (continuación): README/LICENSE, capturas reales, logo + favicon, toggle de tema manual
+
+Todo lo siguiente es del mismo día que la auditoría de arriba, en rondas posteriores. El informe de auditoría (`docs/audit-clipharbor4kindle-2026-07-03@00:35.md`) se actualizó con una sección "6. Post-audit changes" documentando esto mismo, para que no quede desactualizado.
+
+- **README recreado (`README.md` + nuevo `README.es.md`):** reescrito en inglés siguiendo la estructura/formato de un proyecto hermano (DinoDiscovery — badges, Quick start, "Where the idea came from", "Technical problems solved" con bugs reales narrados, fases de construcción, Screenshots, "Ideas evaluated and not pursued", etc.), manteniendo el contenido y la propuesta de valor propios de este proyecto. Se añadió `README.es.md` como versión española paralela con selector EN/ES en ambos ficheros.
+- **`LICENSE` añadida:** PolyForm Noncommercial 1.0.0 (mismo criterio que DinoDiscovery — libre para uso no comercial, sin permitir reventa/uso comercial).
+- **Capturas reales de la app** (`docs/screenshots/app-landing-light.png`, `app-landing-dark.png`, `app-results-light.png`): capturadas con Playwright contra el sitio en vivo (melindross.github.io/ClipHarborKindle), no mockups. La de resultados usa un `My Clippings.txt` sintético de 8 libros (no el fichero personal real del usuario) para que la lista se vea como una biblioteca real sin exponer highlights/notas privados. Sustituyeron las capturas estáticas antiguas (`notion-output-*.png`, renombradas a `docs/screenshots/notion-import-result.png` / `clippings-io-comparison.png`).
+- **Footer con versión de release** (`web/index.html`): enlaza a GitHub Releases. **Debe actualizarse en cada release nueva** (ver memoria de usuario `feedback_footer_version_sync`).
+- **Logo + favicon — "Beacon Mark":** de 4 conceptos pitcheados (Anchor, Beacon, Harbor Wave, Signet — mostrados en un artifact antes de implementar), se eligió el Beacon: un faro cuyo haz se dibuja como tres trazos de subrayador (fading), sobre una línea de agua de puerto. Aplicado como:
+  - `web/favicon.svg` — variante simplificada (trazos más gruesos, sin la línea de agua) para legibilidad a 16px.
+  - Inline en el `<h1>` del header vía `currentColor`, para que siga el tema claro/oscuro de la página automáticamente.
+  - `docs/logo.svg` — variante de color fijo (no `currentColor`) para incrustar en los READMEs, porque un `<img>` suelto no resuelve `currentColor` de forma fiable contra el modo oscuro propio de GitHub.
+- **Toggle de tema manual:** botón único 🌙/☀️ en el header (antes el modo oscuro solo seguía `prefers-color-scheme`, sin override manual). `web/theme-init.js` aplica una elección guardada antes del primer pintado (mismo patrón que `lang-init.js`) para evitar parpadeo. Sin elección guardada, la página sigue el SO en vivo. Esto obligó a refactorizar `style.css` a custom properties (`:root` con valores claros por defecto, override en `@media (prefers-color-scheme: dark)`, y override explícito en `:root.theme-light`/`:root.theme-dark` con mayor prioridad de cascada por orden de aparición) en vez de duplicar cada regla de color a mano.
 
 ## Mejoras pendientes (por prioridad)
 

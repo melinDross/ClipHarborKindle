@@ -1,5 +1,10 @@
 # Audit — Clip Harbor for Kindle (web/) — 2026-07-03
 
+> **Status as of 2026-07-03 (end of day):** 9 of the original 10 findings are
+> now resolved — see "6. Post-audit changes" at the bottom for what shipped
+> and when. Only finding #2 (`robots.txt`/`sitemap.xml`/structured data —
+> Quick Wins #1, #2, #8) remains open.
+
 Scope: `web/` (the live, actively maintained product at
 https://melindross.github.io/ClipHarborKindle/), deployed via
 `.github/workflows/deploy-pages.yml` on every push to `main` touching `web/`.
@@ -37,18 +42,18 @@ follow-up pass since the whole surface area is ~700 lines of code.
 
 ## 2. Quick Wins table
 
-| # | Finding | Type | Effort |
-|---|---|---|---|
-| 1 | Add `<meta name="description">` + Open Graph tags | GEO/SEO | Low |
-| 2 | Add `robots.txt` + `sitemap.xml` | GEO/SEO | Low |
-| 3 | Add `frame-ancestors 'none'` to CSP | Security | Low |
-| 4 | Add real `<h1>` in header | Accessibility | Low |
-| 5 | Increase touch target size of `.lang-button` / `.download-one-button` | Accessibility/Mobile | Low |
-| 6 | Add `rel="noopener"` check / SRI hash on vendored `jszip.min.js` | Security | Low |
-| 7 | Lazy-load JSZip only when download is clicked | Performance | Low |
-| 8 | Add Schema.org `SoftwareApplication` JSON-LD | GEO/SEO | Low |
-| 9 | Add `Referrer-Policy` via `<meta>` | Security | Low |
-| 10 | Fix header `.nav` wrap risk on narrow viewports (<360px) | Visual-UX/Mobile | Low |
+| # | Finding | Type | Effort | Status |
+|---|---|---|---|---|
+| 1 | Add `<meta name="description">` + Open Graph tags | GEO/SEO | Low | Open |
+| 2 | Add `robots.txt` + `sitemap.xml` | GEO/SEO | Low | Open |
+| 3 | Add `frame-ancestors 'none'` to CSP | Security | Low | ✅ Done (2026-07-03) |
+| 4 | Add real `<h1>` in header | Accessibility | Low | ✅ Done (2026-07-03) |
+| 5 | Increase touch target size of `.lang-button` / `.download-one-button` | Accessibility/Mobile | Low | ✅ Done (2026-07-03) |
+| 6 | Add `rel="noopener"` check / SRI hash on vendored `jszip.min.js` | Security | Low | ✅ Done (2026-07-03) |
+| 7 | Lazy-load JSZip only when download is clicked | Performance | Low | ✅ Done (2026-07-03) |
+| 8 | Add Schema.org `SoftwareApplication` JSON-LD | GEO/SEO | Low | Open |
+| 9 | Add `Referrer-Policy` via `<meta>` | Security | Low | ✅ Done (2026-07-03) |
+| 10 | Fix header `.nav` wrap risk on narrow viewports (<360px) | Visual-UX/Mobile | Low | ✅ Done (2026-07-03) |
 
 ## 3. Full findings
 
@@ -151,7 +156,7 @@ follow-up pass since the whole surface area is ~700 lines of code.
 - **Effort:** Low (<30min)
 - **Quick win:** No (correctness needs a screen-reader smoke test, not just a markup change, before calling it fixed)
 
-### [Minor] — No favicon declared
+### [Minor] — No favicon declared — ✅ Done (2026-07-03)
 
 - **Location:** `web/index.html:1-9`
 - **Type:** GEO/SEO / Visual-UX
@@ -159,6 +164,7 @@ follow-up pass since the whole surface area is ~700 lines of code.
 - **Why it matters:** small polish item — affects bookmark/tab recognizability and is one of the "professional finish" signals that separates a portfolio-quality static site from a placeholder page.
 - **Effort:** Low (<30min)
 - **Quick win:** Yes
+- **Resolution:** superseded the "emoji favicon" suggestion with a real vector mark — see "6. Post-audit changes" below. `web/favicon.svg` linked via `<link rel="icon" type="image/svg+xml">`.
 
 ## 4. Final checklist
 
@@ -196,3 +202,47 @@ Total findings: **10** (no duplicates across categories; the mobile/visual findi
 - Dark mode via `prefers-color-scheme`, including on interactive elements.
 - No data ever leaves the browser (`FileReader.readAsText`, output via `Blob`/`URL.createObjectURL`) — genuinely matches its own privacy claim, verified by reading the code, not just trusting the README.
 - No hardcoded secrets/API keys anywhere in `web/` (confirmed by inspection — there's no backend to have secrets for).
+
+## 6. Post-audit changes (2026-07-03)
+
+Everything below shipped the same day as this audit, across several follow-up
+rounds. Listed here so this document stays an accurate record instead of
+going stale the moment the findings above were acted on.
+
+**Quick wins (see updated table in §2):**
+Frame-ancestors CSP directive, real `<h1>`, 44×44px touch targets on the
+language-switch and per-book download buttons, SRI-pinned + lazy-loaded
+JSZip, `Referrer-Policy` meta, and a responsive header that wraps on narrow
+viewports — all landed in one pass right after this audit was written (see
+`CLAUDE.md`, "Ronda 2026-07-03").
+
+**Beyond the original findings — a design pass this audit didn't scope:**
+
+- **Logo + favicon.** The favicon finding above was resolved with a real mark
+  rather than the emoji placeholder originally suggested: the "Beacon Mark" —
+  a lighthouse whose beam is drawn as three fading highlighter strokes over a
+  harbor waterline, picked from four concepts pitched to the project owner.
+  Applied as `web/favicon.svg` (a simplified, thicker-stroke variant tuned
+  for 16px legibility) and inlined in the header via `currentColor` so it
+  follows the page's theme. A fixed-color variant (`docs/logo.svg`) was added
+  separately for embedding in the READMEs, since `currentColor` doesn't
+  resolve reliably inside a bare `<img>` on GitHub's own dark mode.
+- **Manual dark-mode toggle.** The audit noted dark mode already existed via
+  `prefers-color-scheme` (§5) but didn't flag the lack of a manual override
+  as a finding. Added anyway, per direct request: a single 🌙/☀️ toggle
+  button, with `web/theme-init.js` applying a saved choice pre-paint (same
+  pattern as the existing `lang-init.js`) so there's no flash of the wrong
+  theme. No saved choice still follows the OS setting live. `style.css` was
+  refactored to CSS custom properties to support this without duplicating
+  every color rule.
+- **README overhaul + LICENSE.** Unrelated to this audit's scope (it only
+  covered `web/`) but done the same day: both `README.md` and `README.es.md`
+  were rewritten to match the structure/format of a sibling project's README
+  (DinoDiscovery), a `LICENSE` (PolyForm Noncommercial 1.0.0) was added, and
+  real screenshots of the live app (light/dark landing, an 8-book results
+  screen) replaced the older static output-only screenshots.
+
+**Still open from the original findings:** #1/#2/#8 in the Quick Wins table
+— meta description/Open Graph/canonical, `robots.txt`/`sitemap.xml`, and
+Schema.org structured data. None shipped today; still the natural next pass
+whenever SEO/GEO discoverability becomes a priority.
