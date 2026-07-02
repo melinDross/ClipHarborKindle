@@ -57,7 +57,7 @@ follow-up pass since the whole surface area is ~700 lines of code.
 
 ## 3. Full findings
 
-### [Medium] — No `<h1>` on the page
+### [Medium] — No `<h1>` on the page — ✅ Done (2026-07-03)
 
 - **Location:** `web/index.html:12` (`<span>📚 Clip Harbor for Kindle</span>` inside `.nav`), no `<h1>` anywhere in the document
 - **Type:** Accessibility
@@ -65,8 +65,9 @@ follow-up pass since the whole surface area is ~700 lines of code.
 - **Why it matters:** WCAG 2.2 1.3.1 / "Info and Relationships" — screen reader users rely on heading level 1 to confirm what page they're on; skipping straight to `<h2>` breaks the expected hierarchy and is flagged by every automated a11y scanner (axe, Lighthouse), which also hurts perceived SEO quality.
 - **Effort:** Low (<30min)
 - **Quick win:** Yes
+- **Resolution:** the brand `<span>` was replaced with a real `<h1>` (now the "Beacon Mark" logo + wordmark), sized via `.nav h1 { font-size: inherit }` so it doesn't visually change.
 
-### [Medium] — Touch targets below 44×44px minimum
+### [Medium] — Touch targets below 44×44px minimum — ✅ Done (2026-07-03)
 
 - **Location:** `web/style.css:35-43` (`.lang-button`, `padding: 4px 8px; font-size: 0.85rem`) and `web/style.css:101-106` (`.download-one-button`, `padding: 4px 10px; font-size: 0.85rem`)
 - **Type:** Accessibility / Mobile
@@ -74,8 +75,9 @@ follow-up pass since the whole surface area is ~700 lines of code.
 - **Why it matters:** WCAG 2.2 SC 2.5.8 (Target Size, AA — 24px minimum) and the stricter 2.5.5 (AAA, 44px) both apply; more concretely, mis-taps on `ES`/`EN` or "Download" on a phone are the most likely real-world friction point for this tool's actual mobile users.
 - **Effort:** Low (<30min)
 - **Quick win:** Yes
+- **Resolution:** `.lang-button`, `.theme-button`, and `.download-one-button` all now use `min-width: 44px; min-height: 44px` with roomier padding.
 
-### [Medium] — CSP has no `frame-ancestors` directive
+### [Medium] — CSP has no `frame-ancestors` directive — ✅ Done (2026-07-03)
 
 - **Location:** `web/index.html:6`
 - **Type:** Security
@@ -83,6 +85,7 @@ follow-up pass since the whole surface area is ~700 lines of code.
 - **Why it matters:** without it, the page could be iframed on a malicious site and used for clickjacking (e.g. tricking a user into "downloading" something else, or just typosquatting the tool's UI). Low likelihood given the app has no auth/state, but the fix is a one-line addition to a directive that's already there.
 - **Effort:** Low (<30min)
 - **Quick win:** Yes
+- **Resolution:** `frame-ancestors 'none'` added to the existing CSP meta tag in `web/index.html`.
 
 ### [Medium] — No meta description / Open Graph / canonical tags
 
@@ -111,7 +114,7 @@ follow-up pass since the whole surface area is ~700 lines of code.
 - **Effort:** Low (<30min)
 - **Quick win:** Yes
 
-### [Low] — Vendored JSZip has no Subresource Integrity hash
+### [Low] — Vendored JSZip has no Subresource Integrity hash — ✅ Done (2026-07-03)
 
 - **Location:** `web/index.html:38` (`<script src="vendor/jszip.min.js">`)
 - **Type:** Security
@@ -119,8 +122,9 @@ follow-up pass since the whole surface area is ~700 lines of code.
 - **Why it matters:** low risk today since it's same-origin, but it's a defense-in-depth line that costs one attribute and catches accidental or malicious modification of the vendored file without anyone noticing (nothing else in the pipeline verifies its contents).
 - **Effort:** Low (<30min)
 - **Quick win:** Yes (low effort, low-but-nonzero impact)
+- **Resolution:** `web/app.js`'s `loadJSZip()` now injects the `<script>` tag with a `sha384` `integrity` hash pinned against the vendored file's actual contents.
 
-### [Low] — `Referrer-Policy` not set
+### [Low] — `Referrer-Policy` not set — ✅ Done (2026-07-03)
 
 - **Location:** `web/index.html:1-9`
 - **Type:** Security
@@ -128,8 +132,9 @@ follow-up pass since the whole surface area is ~700 lines of code.
 - **Why it matters:** the Ko-fi link (`web/index.html:16`) already sets `rel="noopener noreferrer me"` per-link so this is largely already mitigated for the one outbound link, but a page-level default protects any future outbound link (e.g. a "GitHub repo" link) from leaking the referring URL by default.
 - **Effort:** Low (<30min)
 - **Quick win:** No (real impact is marginal given the single outbound link is already hardened)
+- **Resolution:** added `<meta name="referrer" content="strict-origin-when-cross-origin">` to `web/index.html`.
 
-### [Low] — JSZip loaded eagerly even though only needed for one button
+### [Low] — JSZip loaded eagerly even though only needed for one button — ✅ Done (2026-07-03)
 
 - **Location:** `web/index.html:38` (`<script src="vendor/jszip.min.js">`, loaded unconditionally on every page view)
 - **Type:** Performance
@@ -137,8 +142,9 @@ follow-up pass since the whole surface area is ~700 lines of code.
 - **Why it matters:** every visitor pays for JSZip's parse/compile cost before they've even dropped a file, even though a meaningful fraction will only use "download one book" (which doesn't need JSZip at all — see `app.js:81-89`, `downloadSingleBook` doesn't touch `JSZip`). Marginal on a file this small, but it's a real LCP/TBT win on low-end mobile since it's pure JS execution cost with zero payoff for most of the page's lifetime.
 - **Effort:** Medium (30min-2h) — needs the dynamic import wired through the existing `downloadButton` click handler and a loading state while the module resolves
 - **Quick win:** No (impact is real but small in absolute terms; effort is more than trivial once you handle the "module still loading" edge case)
+- **Resolution:** implemented as a lazy-appended `<script>` tag (not `import()`, since JSZip is a UMD script, not an ES module) behind a cached `loadJSZip()` promise in `web/app.js`, invoked only from the "download all" click handler.
 
-### [Low] — Header `.nav` can wrap awkwardly on narrow viewports
+### [Low] — Header `.nav` can wrap awkwardly on narrow viewports — ✅ Done (2026-07-03)
 
 - **Location:** `web/style.css:9-16` (`.nav { display: flex; justify-content: space-between }`) combined with `web/index.html:12-21` (brand text + Ko-fi badge + two language buttons all in one flex row)
 - **Type:** Visual-UX / Mobile
@@ -146,6 +152,7 @@ follow-up pass since the whole surface area is ~700 lines of code.
 - **Why it matters:** if the row wraps unpredictably (no `flex-wrap` currently set, so children will instead overflow/shrink), the Ko-fi badge or language buttons can get squeezed or clipped on the smallest common phone width — a first impression problem on the exact device class (phone, Kindle-adjacent user) most likely to load this page.
 - **Effort:** Low (<30min)
 - **Quick win:** No (needs actual device/viewport testing to confirm severity before committing to a fix, so not a blind quick win)
+- **Resolution:** `.nav` and `.header-actions` now use `flex-wrap: wrap` with `row-gap`, confirmed at 320px in a real browser.
 
 ### [Minor] — `results` list has no single `aria-live` region covering additions
 
